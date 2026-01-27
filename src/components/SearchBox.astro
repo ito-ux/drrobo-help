@@ -1,0 +1,63 @@
+---
+const placeholder = "キーワードで検索（例：CSV、初期設定）";
+---
+
+<div>
+  <input id="q" type="search" placeholder={placeholder}
+    style="width:100%; padding:12px 14px; border:1px solid #ddd; border-radius:10px;" />
+  <div id="result" style="margin-top:10px;"></div>
+</div>
+
+<script>
+  import Fuse from "fuse.js";
+
+  const input = document.getElementById("q");
+  const resultEl = document.getElementById("result");
+
+  let fuse;
+  let items = [];
+
+  async function load() {
+    const res = await fetch("/search-index.json");
+    items = await res.json();
+    fuse = new Fuse(items, {
+      includeScore: true,
+      threshold: 0.35,
+      keys: ["title", "description"],
+    });
+  }
+
+  function render(list) {
+    if (!list.length) {
+      resultEl.innerHTML = "";
+      return;
+    }
+    const html = `
+      <ul style="padding-left:18px; margin:0;">
+        ${list.slice(0, 10).map(({ item }) => `
+          <li style="margin:6px 0;">
+            <a href="/blog/${item.id}/">${escapeHtml(item.title || "（無題）")}</a>
+            ${item.description ? `<div style="opacity:.75; font-size:12px;">${escapeHtml(item.description)}</div>` : ""}
+          </li>`).join("")}
+      </ul>`;
+    resultEl.innerHTML = html;
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  input.addEventListener("input", () => {
+    const q = input.value.trim();
+    if (!q || !fuse) { render([]); return; }
+    const hits = fuse.search(q);
+    render(hits);
+  });
+
+  load();
+</script>
