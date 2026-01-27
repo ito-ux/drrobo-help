@@ -23,17 +23,19 @@ const Meta = {
 ---
 
 <Layout Meta={Meta}>
-  <div class="space-y-8">
-    <BlogList blogs={blogs} />
-    <Pagination totalCount={totalCount} />
-  </div>
+  <header class="rounded-2xl bg-gray-50 p-6 md:p-10">
+    <h1 class="text-3xl font-bold">{settings?.title ?? "ヘルプセンター"}</h1>
+    <p class="mt-2 opacity-70">知りたいことを検索できます。</p>
+    <div class="mt-6">
+      <SearchBox />
+    </div>
+  </header>
 
-<section style="margin: 18px 0 28px;">
-  <SearchBox />
-</section>
-
-
-  <div class="space-y-8">
-    <CategoryList categories={categories} />
-  </div>
+  <main class="mt-10">
+    <!-- ここがメインコンテンツ -->
+    <div class="space-y-8">
+      <BlogList blogs={blogs} />
+      <Pagination totalCount={totalCount} />
+    </div>
+  </main>
 </Layout>
