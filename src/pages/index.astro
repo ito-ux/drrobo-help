@@ -6,6 +6,7 @@ import Pagination from "@components/Pagination.astro";
 import CategoryList from "@components/CategoryList.astro";
 import { LIMIT } from "@constants/index.ts";
 import { getSettings } from "@libs/microcms.ts";
+import SearchBox from "@components/SearchBox.astro";
 export const prerender = true;
 
 const settings = await getSettings();
@@ -26,6 +27,11 @@ const Meta = {
     <BlogList blogs={blogs} />
     <Pagination totalCount={totalCount} />
   </div>
+
+<section style="margin: 18px 0 28px;">
+  <SearchBox client:load />
+</section>
+
 
   <div class="space-y-8">
     <CategoryList categories={categories} />
