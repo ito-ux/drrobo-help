@@ -3,6 +3,6 @@ import tailwind from "@astrojs/tailwind";
 
 export default defineConfig({
   output: 'static',
-  site: "https://astro-simple-blog-omega.vercel.app/",
+  site: "https://help.drrobo.jp/",
   integrations: [tailwind()],
 });
