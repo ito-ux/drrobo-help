@@ -1,15 +1,14 @@
 ---
-import { getBlogDetail, getCategoryList, getBlogList } from "@libs/microcms.ts";
 import Layout from "@layouts/Layout.astro";
-import BlogPost from "@components/BlogPost.astro";
-import CategoryList from "@components/CategoryList.astro";
+import { getBlogList, getBlogDetail } from "@libs/microcms.ts";
 
 export const prerender = true;
 
-// ✅ 追加：静的生成する対象（id一覧）を返す
 export async function getStaticPaths() {
-  const { contents } = await getBlogList({ limit: 100 }); // 記事数が100超えるなら後で拡張
-  return contents.map((post) => ({
+  // まずは大きめに（記事が増えたら後でページング対応）
+  const data = await getBlogList({ limit: 1000 });
+
+  return data.contents.map((post) => ({
     params: { id: post.id },
   }));
 }
@@ -17,26 +16,44 @@ export async function getStaticPaths() {
 const { id } = Astro.params;
 if (!id) throw new Error("id is required");
 
-const url = new URL(Astro.url.href);
-const draftKey = url.searchParams.get("draftKey");
+// 詳細取得（ここで落ちる可能性があるので、try/catchで白画面回避）
+let post: any = null;
+let errorMsg: string | null = null;
 
-const cachePolicies = {
-  noCache: "no-store, no-cache, max-age=0, must-revalidate",
-  publicIsr: "public, s-maxage=180, stale-while-revalidate=180",
-};
-
-const cachePolicy = draftKey ? cachePolicies.noCache : cachePolicies.publicIsr;
-Astro.response.headers.set("Cache-Control", cachePolicy);
-
-const blog = await getBlogDetail(id, draftKey ? { draftKey } : {});
-const { contents: categories } = await getCategoryList();
-
-const Meta = {
-  title: blog ? blog.title : "ブログ記事が見つかりません",
-  image: blog.thumbnail
-    ? blog.thumbnail.url
-    : new URL("/assets/images/og.png", Astro.site),
-  ogType: "article",
-  description: blog.description,
-};
+try {
+  post = await getBlogDetail(id);
+} catch (e: any) {
+  errorMsg = e?.message ?? "getBlogDetail failed";
+}
 ---
+
+<Layout title={post?.title ?? "記事"}>
+  <main style="max-width: 920px; margin: 0 auto; padding: 24px;">
+    <p style="opacity:.6; font-size:12px;">/blog/{id}</p>
+
+    {errorMsg ? (
+      <>
+        <h1>記事の読み込みに失敗しました</h1>
+        <pre style="white-space:pre-wrap; opacity:.7;">{errorMsg}</pre>
+      </>
+    ) : (
+      <>
+        <h1>{post?.title ?? "（タイトル未設定）"}</h1>
+
+        {/* 画像が無いと落ちる系を潰す */}
+        {post?.eyecatch?.url ? (
+          <img src={post.eyecatch.url} alt="" style="max-width:100%; height:auto;" />
+        ) : null}
+
+        {/* 本文フィールド名はテンプレで違うことがある */}
+        {post?.content ? (
+          <div set:html={post.content} />
+        ) : post?.body ? (
+          <div set:html={post.body} />
+        ) : (
+          <p style="opacity:.7;">本文がありません（content/body のどちらも空、またはフィールド名が違う可能性）</p>
+        )}
+      </>
+    )}
+  </main>
+</Layout>
