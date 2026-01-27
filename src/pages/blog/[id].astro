@@ -41,3 +41,16 @@ const Meta = {
   description: blog?.description ?? "",
 };
 ---
+<Layout Meta={Meta}>
+  <div class="space-y-8">
+    {blog ? (
+      <BlogPost blog={blog} />
+    ) : (
+      <p>記事が見つかりません</p>
+    )}
+  </div>
+
+  <div class="space-y-8">
+    <CategoryList categories={categories} />
+  </div>
+</Layout>
