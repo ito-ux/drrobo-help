@@ -17,26 +17,27 @@ export async function getStaticPaths() {
 const { id } = Astro.params;
 if (!id) throw new Error("id is required");
 
-const url = new URL(Astro.url.href);
-const draftKey = url.searchParams.get("draftKey");
+// const url = new URL(Astro.url.href);
+// const draftKey = url.searchParams.get("draftKey");
+// 
+// const cachePolicies = {
+//   noCache: "no-store, no-cache, max-age=0, must-revalidate",
+//   publicIsr: "public, s-maxage=180, stale-while-revalidate=180",
+// };
+// 
+// const cachePolicy = draftKey ? cachePolicies.noCache : cachePolicies.publicIsr;
+// Astro.response.headers.set("Cache-Control", cachePolicy);
+// 
+// const blog = await getBlogDetail(id, draftKey ? { draftKey } : {});
 
-const cachePolicies = {
-  noCache: "no-store, no-cache, max-age=0, must-revalidate",
-  publicIsr: "public, s-maxage=180, stale-while-revalidate=180",
-};
+const blog = await getBlogDetail(id);
 
-const cachePolicy = draftKey ? cachePolicies.noCache : cachePolicies.publicIsr;
-Astro.response.headers.set("Cache-Control", cachePolicy);
-
-const blog = await getBlogDetail(id, draftKey ? { draftKey } : {});
 const { contents: categories } = await getCategoryList();
 
 const Meta = {
-  title: blog ? blog.title : "ブログ記事が見つかりません",
-  image: blog.thumbnail
-    ? blog.thumbnail.url
-    : new URL("/assets/images/og.png", Astro.site),
+  title: blog?.title ?? "記事が見つかりません",
+  image: blog?.thumbnail?.url ?? "/assets/images/og.png",
   ogType: "article",
-  description: blog.description,
+  description: blog?.description ?? "",
 };
 ---
