@@ -1,9 +1,18 @@
 ---
-import { getBlogDetail, getCategoryList } from "@libs/microcms.ts";
+import { getBlogDetail, getCategoryList, getBlogList } from "@libs/microcms.ts";
 import Layout from "@layouts/Layout.astro";
 import BlogPost from "@components/BlogPost.astro";
 import CategoryList from "@components/CategoryList.astro";
+
 export const prerender = true;
+
+// ✅ 追加：静的生成する対象（id一覧）を返す
+export async function getStaticPaths() {
+  const { contents } = await getBlogList({ limit: 100 }); // 記事数が100超えるなら後で拡張
+  return contents.map((post) => ({
+    params: { id: post.id },
+  }));
+}
 
 const { id } = Astro.params;
 if (!id) throw new Error("id is required");
@@ -20,8 +29,6 @@ const cachePolicy = draftKey ? cachePolicies.noCache : cachePolicies.publicIsr;
 Astro.response.headers.set("Cache-Control", cachePolicy);
 
 const blog = await getBlogDetail(id, draftKey ? { draftKey } : {});
-
-// カテゴリーリストを取得
 const { contents: categories } = await getCategoryList();
 
 const Meta = {
@@ -33,19 +40,3 @@ const Meta = {
   description: blog.description,
 };
 ---
-
-<Layout Meta={Meta}>
-  <div class="space-y-8">
-    {
-      blog ? (
-        <BlogPost blog={blog} />
-      ) : (
-        <p class="text-center text-lg">このブログ記事は存在しません。</p>
-      )
-    }
-  </div>
-
-  <div class="space-y-8">
-    <CategoryList categories={categories} />
-  </div>
-</Layout>
