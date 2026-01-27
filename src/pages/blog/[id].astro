@@ -4,11 +4,25 @@ import { getBlogList, getBlogDetail } from "@libs/microcms.ts";
 
 export const prerender = true;
 
+/**
+ * microCMSのlist APIは limit <= 100 制限があるので、
+ * offset を使って全件分のidを取り切る。
+ */
 export async function getStaticPaths() {
-  // まずは大きめに（記事が増えたら後でページング対応）
-  const data = await getBlogList({ limit: 1000 });
+  const limit = 100;
 
-  return data.contents.map((post) => ({
+  // まず総件数を取る（contentsも返る前提）
+  const first = await getBlogList({ limit, offset: 0 });
+  const totalCount = first.totalCount ?? first.contents?.length ?? 0;
+
+  const all = [...(first.contents ?? [])];
+
+  for (let offset = limit; offset < totalCount; offset += limit) {
+    const page = await getBlogList({ limit, offset });
+    all.push(...(page.contents ?? []));
+  }
+
+  return all.map((post) => ({
     params: { id: post.id },
   }));
 }
@@ -16,7 +30,6 @@ export async function getStaticPaths() {
 const { id } = Astro.params;
 if (!id) throw new Error("id is required");
 
-// 詳細取得（ここで落ちる可能性があるので、try/catchで白画面回避）
 let post: any = null;
 let errorMsg: string | null = null;
 
@@ -40,12 +53,10 @@ try {
       <>
         <h1>{post?.title ?? "（タイトル未設定）"}</h1>
 
-        {/* 画像が無いと落ちる系を潰す */}
         {post?.eyecatch?.url ? (
           <img src={post.eyecatch.url} alt="" style="max-width:100%; height:auto;" />
         ) : null}
 
-        {/* 本文フィールド名はテンプレで違うことがある */}
         {post?.content ? (
           <div set:html={post.content} />
         ) : post?.body ? (
