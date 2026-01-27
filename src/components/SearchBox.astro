@@ -3,9 +3,17 @@ const placeholder = "キーワードで検索（例：CSV、初期設定）";
 ---
 
 <div>
-  <input id="q" type="search" placeholder={placeholder}
-    style="width:100%; padding:12px 14px; border:1px solid #ddd; border-radius:10px;" />
-  <div id="result" style="margin-top:10px;"></div>
+<form method="get" action="/search">
+  <input
+    id="q"
+    name="q"
+    type="search"
+    placeholder="検索"
+    style="width:100%; padding:12px 14px; border:1px solid #ddd; border-radius:10px;"
+  />
+</form>
+<div id="result" style="margin-top:10px;"></div>
+
 </div>
 
 <script>
