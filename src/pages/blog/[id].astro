@@ -3,7 +3,7 @@ import { getBlogDetail, getCategoryList } from "@libs/microcms.ts";
 import Layout from "@layouts/Layout.astro";
 import BlogPost from "@components/BlogPost.astro";
 import CategoryList from "@components/CategoryList.astro";
-export const prerender = false;
+export const prerender = true;
 
 const { id } = Astro.params;
 if (!id) throw new Error("id is required");
