@@ -44,30 +44,44 @@ const placeholder = "キーワードで検索（例：CSV、初期設定）";
     });
   }
 
-  function render(list) {
-    if (!list.length) {
-      resultEl.innerHTML = "";
-      return;
-    }
+function render(list) {
+  const q = input.value.trim();
 
-    const html = `
-      <div style="border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; background:#fff;">
-        <ul style="list-style:none; padding:0; margin:0;">
-          ${list.slice(0, 8).map(({ item }) => `
-            <li style="border-top:1px solid #f3f4f6;">
-              <a href="/blog/${item.id}/" style="display:block; padding:12px 14px; text-decoration:none;">
-                <div style="font-weight:600; color:#111827;">
-                  ${escapeHtml(item.title || "（無題）")}
-                </div>
-                ${item.description ? `<div style="margin-top:4px; color:#6b7280; font-size:12px;">${escapeHtml(item.description)}</div>` : ""}
-              </a>
-            </li>
-          `).join("")}
-        </ul>
-      </div>
-    `;
-    resultEl.innerHTML = html;
+  if (!list.length) {
+    resultEl.innerHTML = "";
+    return;
   }
+
+  const MAX = 5;
+  const sliced = list.slice(0, MAX);
+  const moreCount = Math.max(0, list.length - MAX);
+
+  const html = `
+    <div style="border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; background:#fff;">
+      <ul style="list-style:none; padding:0; margin:0; text-align:left;">
+        ${sliced.map(({ item }, i) => `
+          <li style="${i === 0 ? "" : "border-top:1px solid #f3f4f6;"}">
+            <a href="/blog/${item.id}/" style="display:block; padding:12px 14px; text-decoration:none;">
+              <div style="font-weight:600; color:#111827; text-align:left;">
+                ${escapeHtml(item.title || "（無題）")}
+              </div>
+              ${item.description ? `<div style="margin-top:4px; color:#6b7280; font-size:12px; text-align:left;">${escapeHtml(item.description)}</div>` : ""}
+            </a>
+          </li>
+        `).join("")}
+      </ul>
+
+      <div style="border-top:1px solid #f3f4f6; padding:10px 14px; display:flex; justify-content:flex-end;">
+        <a href="/search?q=${encodeURIComponent(q)}" style="font-size:12px; color:#111827; text-decoration:underline;">
+          検索結果一覧へ${moreCount > 0 ? `（他 ${moreCount} 件）` : ""}
+        </a>
+      </div>
+    </div>
+  `;
+
+  resultEl.innerHTML = html;
+}
+
 
   function escapeHtml(s) {
     return String(s)
@@ -78,12 +92,18 @@ const placeholder = "キーワードで検索（例：CSV、初期設定）";
       .replaceAll("'","&#039;");
   }
 
-  input.addEventListener("input", () => {
+let timer;
+
+input.addEventListener("input", () => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
     const q = input.value.trim();
     if (!q || !fuse) { render([]); return; }
     const hits = fuse.search(q);
     render(hits);
-  });
+  }, 150);
+});
+
 
   // 入力欄が空になったら候補を消す（×ボタン等にも追従）
   input.addEventListener("search", () => {

@@ -10,6 +10,10 @@ export const GET: APIRoute = async () => {
     id: p.id,
     title: p.title ?? "",
     description: p.description ?? "",
+
+    // 🔽 検索の賢さ用
+    category: p.category?.name ?? "",
+    tags: (p.tags ?? []).map((t) => t.name).join(" "),
   }));
 
   return new Response(JSON.stringify(index), {
