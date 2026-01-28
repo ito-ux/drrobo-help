@@ -53,21 +53,10 @@ const mainClass = hasSidebar
   <body>
     <Header title={siteTitle} />
 
-    <main class={mainClass}>
-      {hasSidebar ? (
-        <>
-          <div class="min-w-0">
-            <slot name="main" />
-          </div>
+<main class="flex-1 mx-auto w-full max-w-6xl px-4 md:px-6 py-12 grid grid-cols-1 md:grid-cols-[3fr_1fr] gap-8">
+  <slot />
+</main>
 
-          <aside class="min-w-0">
-            <slot name="sidebar" />
-          </aside>
-        </>
-      ) : (
-        <slot name="main" />
-      )}
-    </main>
 
     <Footer title={siteTitle} />
   </body>
