@@ -94,7 +94,7 @@ const placeholder = "キーワードで検索（例：CSV、初期設定）";
       <ul style="list-style:none; padding:0; margin:0; text-align:left;">
         ${sliced.map(({ item }, i) => `
           <li style="${i === 0 ? "" : "border-top:1px solid #f3f4f6;"}">
-            <a href="/blog/${item.id}/" style="display:block; padding:12px 14px; text-decoration:none;">
+            <a href="/docs/${item.id}/" style="display:block; padding:12px 14px; text-decoration:none;">
               <div style="font-weight:600; color:#111827;">
                 ${escapeHtml(item.title || "（無題）")}
               </div>
