@@ -18,6 +18,7 @@ const Meta = { title: q ? `検索: ${q}` : "検索" };
 ---
 
 <Layout Meta={Meta}>
+<div slot="main">
   <section class="space-y-4">
     <h1 class="text-2xl font-bold">検索結果</h1>
 
@@ -75,5 +76,5 @@ const Meta = { title: q ? `検索: ${q}` : "検索" };
     }
   }
 </script>
-
+</div>
 </Layout>
