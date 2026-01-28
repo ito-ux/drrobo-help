@@ -25,7 +25,7 @@ export type Notice = {
 } & MicroCMSListContent;
 
 // ★ microCMS 側のエンドポイント名と完全一致させる
-const NOTICE_ENDPOINT = "notices";
+const NOTICE_ENDPOINT = "news";
 
 export const getNoticeList = async (queries?: MicroCMSQueries) => {
   return client.getList<Notice>({
