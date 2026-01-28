@@ -1,6 +1,7 @@
 ---
 import Layout from "@layouts/Layout.astro";
 import { getBlogList } from "@libs/microcms.ts";
+import SearchBox from "@components/SearchBox.astro";
 
 export const prerender = true;
 
@@ -18,63 +19,102 @@ const Meta = { title: q ? `検索: ${q}` : "検索" };
 ---
 
 <Layout Meta={Meta}>
-<div slot="main">
-  <section class="space-y-4">
-    <h1 class="text-2xl font-bold">検索結果</h1>
+  <div slot="main" class="space-y-6">
+    <!-- 見出し + 検索ボックス（トップと統一したいなら SearchBox を使う） -->
+    <section class="rounded-2xl bg-gray-50 p-6 md:p-8">
+      <h1 class="text-2xl font-semibold tracking-tight">検索結果</h1>
+      <p id="summary" class="mt-2 text-sm text-gray-600"></p>
 
-    <form method="get" action="/search" class="space-y-2">
-      <input
-        name="q"
-        type="search"
-        value={q}
-        placeholder="キーワードで検索"
-        class="w-full rounded-xl border border-gray-300 px-4 py-3"
-      />
-      <button class="rounded-xl border px-4 py-2">検索</button>
-    </form>
+      <div class="mt-4">
+        <!-- ✅ ここでデザイン統一（使わないなら下のformを復活させてOK） -->
+        <SearchBox />
+      </div>
 
-    <div id="result" class="space-y-2"></div>
-  </section>
+      <!-- SearchBox を使わない場合はこれを使う（デザインだけ揃えたフォーム） -->
+      <!--
+      <form method="get" action="/search" class="mt-4 flex gap-2">
+        <input
+          name="q"
+          type="search"
+          value={q}
+          placeholder="キーワードで検索"
+          class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3"
+        />
+        <button class="rounded-xl border bg-white px-4 py-3 text-sm">検索</button>
+      </form>
+      -->
+    </section>
 
-<script define:vars={{ ITEMS: items }}>
-  const params = new URLSearchParams(location.search);
-  const q = (params.get("q") || "").trim().toLowerCase();
+    <!-- 結果一覧：お知らせ一覧のカード風 -->
+    <section class="rounded-2xl border bg-white p-6">
+      <div id="result" class="divide-y"></div>
 
-  const resultEl = document.getElementById("result");
+      <div class="mt-4 text-sm text-gray-500">
+        <span id="count"></span>
+      </div>
+    </section>
 
-  const escapeHtml = (s) =>
-    String(s)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
+    <script define:vars={{ ITEMS: items, INITIAL_Q: q }}>
+      const params = new URLSearchParams(location.search);
+      const q = (params.get("q") || INITIAL_Q || "").trim().toLowerCase();
 
-  if (!q) {
-    resultEl.innerHTML = "<p>キーワードを入力してください。</p>";
-  } else {
-    const hits = ITEMS.filter((x) => {
-      const t = (x.title || "").toLowerCase();
-      const d = (x.description || "").toLowerCase();
-      return t.includes(q) || d.includes(q);
-    });
+      const resultEl = document.getElementById("result");
+      const summaryEl = document.getElementById("summary");
+      const countEl = document.getElementById("count");
 
-    if (!hits.length) {
-      resultEl.innerHTML = `<p>「<b>${escapeHtml(q)}</b>」に一致する記事がありません。</p>`;
-    } else {
-      resultEl.innerHTML = `
-        <p>「<b>${escapeHtml(q)}</b>」の検索結果：${hits.length}件</p>
-        <ul class="list-disc pl-5">
-          ${hits.slice(0, 50).map((item) => `
-            <li class="my-2">
-              <a class="underline" href="/blog/${item.id}/">${escapeHtml(item.title || "（無題）")}</a>
-              ${item.description ? `<div class="text-sm opacity-70">${escapeHtml(item.description)}</div>` : ""}
-            </li>
-          `).join("")}
-        </ul>
-      `;
-    }
-  }
-</script>
-</div>
+      const escapeHtml = (s) =>
+        String(s)
+          .replaceAll("&","&amp;")
+          .replaceAll("<","&lt;")
+          .replaceAll(">","&gt;")
+          .replaceAll('"',"&quot;")
+          .replaceAll("'","&#039;");
+
+      const renderEmpty = () => {
+        summaryEl.textContent = "キーワードを入力して検索してください";
+        resultEl.innerHTML = `<div class="py-3 text-sm text-gray-600">該当する結果が見つかりませんでした。</div>`;
+        countEl.textContent = "";
+      };
+
+      if (!q) {
+        // q無しなら空状態
+        summaryEl.textContent = "キーワードを入力して検索してください";
+        resultEl.innerHTML = `<div class="py-3 text-sm text-gray-600">キーワードを入力してください。</div>`;
+        countEl.textContent = "";
+      } else {
+        const hits = ITEMS.filter((x) => {
+          const t = (x.title || "").toLowerCase();
+          const d = (x.description || "").toLowerCase();
+          return t.includes(q) || d.includes(q);
+        });
+
+        summaryEl.innerHTML = `「<b>${escapeHtml(q)}</b>」の検索結果：${hits.length}件`;
+
+        if (!hits.length) {
+          resultEl.innerHTML = `<div class="py-3 text-sm text-gray-600">一致する記事がありません。</div>`;
+          countEl.textContent = "";
+        } else {
+          const show = hits.slice(0, 50);
+
+          resultEl.innerHTML = show.map((item) => `
+            <a
+              class="block py-3 hover:bg-gray-50 rounded-lg px-2 -mx-2"
+              href="/docs/${encodeURIComponent(item.id)}/"
+            >
+              <div class="text-sm font-medium text-gray-900">
+                ${escapeHtml(item.title || "（無題）")}
+              </div>
+              ${
+                item.description
+                  ? `<div class="mt-1 text-xs text-gray-600">${escapeHtml(item.description)}</div>`
+                  : ""
+              }
+            </a>
+          `).join("");
+
+          countEl.textContent = show.length < hits.length ? `表示：${show.length}件 / 全${hits.length}件` : `全${hits.length}件`;
+        }
+      }
+    </script>
+  </div>
 </Layout>
