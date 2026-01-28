@@ -27,21 +27,27 @@ const Meta = { title: q ? `検索: ${q}` : "検索" };
         <p id="summary" class="mt-2 text-sm text-gray-600"></p>
       </div>
 
-      <form method="get" action="/search" class="flex items-center gap-2 md:gap-3">
-        <input
-          name="q"
-          type="search"
-          value={q}
-          placeholder="キーワードで検索（例：CSV、初期設定）"
-          class="w-[320px] max-w-[60vw] rounded-full border border-gray-300 bg-white px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-black/10"
-        />
-        <button
-          type="submit"
-          class="rounded-full bg-black px-5 py-3 text-sm font-medium text-white"
-        >
-          検索
-        </button>
-      </form>
+<form
+  method="get"
+  action="/search"
+  class="flex items-stretch overflow-hidden rounded-full border border-gray-300 bg-white"
+>
+  <input
+    name="q"
+    type="search"
+    value={q}
+    placeholder="キーワードで検索（例：CSV、初期設定）"
+    class="w-[360px] max-w-[60vw] px-6 py-3 text-sm outline-none"
+  />
+
+  <button
+    type="submit"
+    class="bg-black px-6 py-3 text-sm font-medium text-white"
+  >
+    検索
+  </button>
+</form>
+
     </div>
   </section>
 
