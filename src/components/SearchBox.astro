@@ -3,40 +3,36 @@ const placeholder = "キーワードで検索（例：CSV、初期設定）";
 ---
 
 <div class="mx-auto w-full max-w-2xl">
-  <form action="/search" method="get" class="mx-auto w-full max-w-2xl">
-  <div class="relative">
-    <div class="flex items-center">
-      <input
-        id="q"
-        type="search"
-        name="q"
-        placeholder="キーワードで検索（例：CSV、初期設定）"
-        class="w-full rounded-l-full border border-gray-300 bg-white px-6 py-3 text-base
-               focus:outline-none focus:ring-2 focus:ring-black/30"
-      />
-      <button
-        type="submit"
-        class="shrink-0 rounded-r-full bg-black px-6 py-3 text-sm font-semibold text-white hover:bg-black/90"
-      >
-        検索
-      </button>
+  <form action="/search" method="get" class="w-full">
+    <div class="relative">
+      <div class="flex items-stretch">
+        <input
+          id="q"
+          type="search"
+          name="q"
+          placeholder={placeholder}
+          autocomplete="off"
+          class="w-full rounded-l-full border border-gray-300 bg-white px-6 py-3 text-base
+                 focus:outline-none focus:ring-2 focus:ring-black/30"
+        />
+
+        <button
+          type="submit"
+          class="shrink-0 rounded-r-full bg-black px-6 py-3 text-sm font-semibold text-white hover:bg-black/90"
+        >
+          検索
+        </button>
+      </div>
+
+      <!-- ✅ サジェスト：中身がある時だけ表示（absoluteで下に“重ねる”） -->
+      <div
+        id="result"
+        class="absolute left-0 right-0 top-full mt-2 z-50 hidden
+               rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden"
+        aria-live="polite"
+      ></div>
     </div>
-
-    <!-- ✅ サジェストは「上にかぶせる」 -->
-    <div
-      id="result"
-      class="absolute left-0 right-0 top-full mt-2 z-50
-             rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden"
-    ></div>
-  </div>
-
-  <div class="mt-2 flex justify-end">
-    <a href={`/search?q=`} class="text-sm text-gray-600 hover:underline">検索結果一覧へ</a>
-  </div>
-</form>
-
-
-  <div id="result" class="mt-3"></div>
+  </form>
 </div>
 
 <script>
@@ -47,63 +43,26 @@ const placeholder = "キーワードで検索（例：CSV、初期設定）";
 
   let fuse;
   let items = [];
+  let timer;
 
   async function load() {
     const res = await fetch("/search-index.json");
     items = await res.json();
+
     fuse = new Fuse(items, {
-  includeScore: true,
-  threshold: 0.35,
-  ignoreLocation: true,
-  minMatchCharLength: 2,
-  keys: [
-    { name: "title", weight: 3.0 },
-    { name: "description", weight: 1.5 },
-    { name: "category", weight: 1.2 },
-    { name: "tags", weight: 1.0 },
-    { name: "body", weight: 0.8 }, // 本文は弱めに
-  ],
-});
+      includeScore: true,
+      threshold: 0.35,
+      ignoreLocation: true,
+      minMatchCharLength: 2,
+      keys: [
+        { name: "title", weight: 3.0 },
+        { name: "description", weight: 1.5 },
+        { name: "category", weight: 1.2 },
+        { name: "tags", weight: 1.0 },
+        { name: "body", weight: 0.8 },
+      ],
+    });
   }
-
-function render(list) {
-  const q = input.value.trim();
-
-  if (!list.length) {
-    resultEl.innerHTML = "";
-    return;
-  }
-
-  const MAX = 5;
-  const sliced = list.slice(0, MAX);
-  const moreCount = Math.max(0, list.length - MAX);
-
-  const html = `
-    <div style="border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; background:#fff;">
-      <ul style="list-style:none; padding:0; margin:0; text-align:left;">
-        ${sliced.map(({ item }, i) => `
-          <li style="${i === 0 ? "" : "border-top:1px solid #f3f4f6;"}">
-            <a href="/blog/${item.id}/" style="display:block; padding:12px 14px; text-decoration:none;">
-              <div style="font-weight:600; color:#111827; text-align:left;">
-                ${escapeHtml(item.title || "（無題）")}
-              </div>
-              ${item.description ? `<div style="margin-top:4px; color:#6b7280; font-size:12px; text-align:left;">${escapeHtml(item.description)}</div>` : ""}
-            </a>
-          </li>
-        `).join("")}
-      </ul>
-
-      <div style="border-top:1px solid #f3f4f6; padding:10px 14px; display:flex; justify-content:flex-end;">
-        <a href="/search?q=${encodeURIComponent(q)}" style="font-size:12px; color:#111827; text-decoration:underline;">
-          検索結果一覧へ${moreCount > 0 ? `（他 ${moreCount} 件）` : ""}
-        </a>
-      </div>
-    </div>
-  `;
-
-  resultEl.innerHTML = html;
-}
-
 
   function escapeHtml(s) {
     return String(s)
@@ -114,22 +73,71 @@ function render(list) {
       .replaceAll("'","&#039;");
   }
 
-let timer;
+  function hideSuggest() {
+    resultEl.classList.add("hidden");
+    resultEl.innerHTML = "";
+  }
 
-input.addEventListener("input", () => {
-  clearTimeout(timer);
-  timer = setTimeout(() => {
+  function render(list) {
     const q = input.value.trim();
-    if (!q || !fuse) { render([]); return; }
-    const hits = fuse.search(q);
-    render(hits);
-  }, 150);
-});
 
+    if (!q || !list.length) {
+      hideSuggest();
+      return;
+    }
 
-  // 入力欄が空になったら候補を消す（×ボタン等にも追従）
+    const MAX = 5;
+    const sliced = list.slice(0, MAX);
+    const moreCount = Math.max(0, list.length - MAX);
+
+    const html = `
+      <ul style="list-style:none; padding:0; margin:0; text-align:left;">
+        ${sliced.map(({ item }, i) => `
+          <li style="${i === 0 ? "" : "border-top:1px solid #f3f4f6;"}">
+            <a href="/blog/${item.id}/" style="display:block; padding:12px 14px; text-decoration:none;">
+              <div style="font-weight:600; color:#111827;">
+                ${escapeHtml(item.title || "（無題）")}
+              </div>
+              ${item.description ? `<div style="margin-top:4px; color:#6b7280; font-size:12px;">${escapeHtml(item.description)}</div>` : ""}
+            </a>
+          </li>
+        `).join("")}
+      </ul>
+
+      <div style="border-top:1px solid #f3f4f6; padding:10px 14px; display:flex; justify-content:flex-end;">
+        <a href="/search?q=${encodeURIComponent(q)}" style="font-size:12px; color:#111827; text-decoration:underline;">
+          検索結果一覧へ${moreCount > 0 ? `（他 ${moreCount} 件）` : ""}
+        </a>
+      </div>
+    `;
+
+    resultEl.innerHTML = html;
+    resultEl.classList.remove("hidden");
+  }
+
+  input.addEventListener("input", () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      const q = input.value.trim();
+      if (!q || !fuse) { hideSuggest(); return; }
+      render(fuse.search(q));
+    }, 150);
+  });
+
+  // ×ボタン/ESC/クリアなどで空になったら閉じる
   input.addEventListener("search", () => {
-    if (!input.value.trim()) render([]);
+    if (!input.value.trim()) hideSuggest();
+  });
+
+  // フォーカスが外れたら閉じる（クリック遷移の邪魔にならないよう少し遅延）
+  input.addEventListener("blur", () => {
+    setTimeout(() => hideSuggest(), 120);
+  });
+
+  // クリックしたら閉じる（任意）
+  document.addEventListener("click", (e) => {
+    const within = e.target === input || resultEl.contains(e.target);
+    if (!within) hideSuggest();
   });
 
   load();
