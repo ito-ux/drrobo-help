@@ -13,12 +13,27 @@ import {
   tocExtractor,
 } from "microcms-rich-editor-handler";
 
-// ...既存の getStaticPaths / fetch blog などはそのまま...
+/**
+ * ✅ 静的サイト（output: "static"）では必須
+ * /blog/[id] を生成するための全ID一覧を返す
+ */
+export async function getStaticPaths() {
+  // まずは最大100件取得（件数が増えたら後でページング対応）
+  const data = await getBlogList({ limit: 100 });
 
+  return data.contents.map((item) => ({
+    params: { id: item.id },
+  }));
+}
+
+// ✅ 動的ルートのパラメータ（ここで id が定義される）
+const { id } = Astro.params;
+
+// ✅ 記事詳細・カテゴリ取得
 const blog = await getBlogDetail(id);
 const { contents: categories } = await getCategoryList();
 
-// ✅ ここで本文HTML化 + TOC抽出
+// ✅ 本文HTML化 + TOC抽出
 type TocItem = { id: string; text: string; level: number };
 let toc: TocItem[] = [];
 
@@ -32,9 +47,7 @@ if (blog?.content) {
       }),
     ],
     extractors: {
-      toc: [
-        tocExtractor({ ignoreLevels: [4, 5] }),
-      ],
+      toc: [tocExtractor({ ignoreLevels: [4, 5] })],
     },
   });
 
@@ -49,6 +62,7 @@ const Meta = {
   description: blog?.description ?? "",
 };
 ---
+
 <Layout Meta={Meta}>
   <div slot="main" class="space-y-8">
     {blog ? <BlogPost blog={blog} /> : <p>記事が見つかりません</p>}
