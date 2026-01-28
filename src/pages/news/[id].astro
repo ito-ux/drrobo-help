@@ -22,13 +22,20 @@ const Meta = {
 ---
 
 <Layout Meta={Meta}>
-  <div slot="main" class="prose prose-neutral max-w-none">
-    <p class="text-sm text-gray-500">
-      {notice.publishedAt?.slice(0, 10)}
-    </p>
-    <h1>{notice.title}</h1>
+  <div slot="main" class="w-full">
+    <article class="prose prose-neutral max-w-none">
+      <p class="text-sm text-gray-500">
+        {notice.publishedAt?.slice(0, 10)}
+      </p>
 
-    {/* content がリッチエディタなら、今 docs で使ってるレンダラに合わせて置き換え */}
-    <div set:html={notice.content ?? ""} />
+      <h1 class="text-3xl font-semibold leading-tight mt-2">
+        {notice.title}
+      </h1>
+
+      <div
+        class="entry-content prose prose-neutral max-w-none"
+        set:html={notice.content ?? ""}
+      />
+    </article>
   </div>
 </Layout>
