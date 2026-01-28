@@ -23,19 +23,72 @@ const Meta = {
 ---
 
 <Layout Meta={Meta}>
-  <div slot="main">
-    <header class="text-center rounded-2xl bg-gray-50 p-6 md:p-10">
-      <h1 class="text-3xl">どんなことにお困りですか？</h1>
+  <div slot="main" class="space-y-10">
+    <!-- ① 検索ヒーロー -->
+    <section class="rounded-2xl bg-gray-50 p-6 md:p-10 text-center">
+      <h1 class="text-3xl md:text-4xl font-semibold tracking-tight">
+        どんなことにお困りですか？
+      </h1>
       <div class="mt-6">
         <SearchBox />
       </div>
-    </header>
+    </section>
 
-    <main class="mt-10">
-      <div class="space-y-8">
-        <BlogList blogs={blogs} />
-        <Pagination totalCount={totalCount} />
+    <!-- ② 特集バナー（スタートガイド） -->
+<section class="rounded-2xl border border-gray-200 overflow-hidden">
+  <a href="/start-guide" class="block">
+    <div class="aspect-[5/1] w-full">
+      <img
+        src="/assets/images/bn_start_guide.png"
+        alt="Dr.Robo スタートガイド"
+        class="w-full h-full object-cover"
+      />
+    </div>
+  </a>
+</section>
+
+    <!-- ③ お知らせ（1カラム） -->
+    <section class="rounded-2xl border border-gray-200 p-6 md:p-8">
+      <div class="flex items-end justify-between gap-4">
+        <h2 class="text-lg md:text-xl font-semibold">お知らせ</h2>
+        <a href="/news" class="text-sm font-medium text-gray-600 hover:underline">
+          過去のお知らせを見る →
+        </a>
       </div>
-    </main>
+
+      <div class="mt-4 divide-y divide-gray-200">
+        <!-- ここはあとで microCMS の「お知らせ」記事を map で差し込む -->
+        <a href="#" class="block py-4 hover:bg-gray-50 rounded-xl px-2 -mx-2">
+          <div class="text-sm text-gray-500">2026-01-28</div>
+          <div class="mt-1 font-medium">お知らせタイトル（仮）</div>
+        </a>
+        <a href="#" class="block py-4 hover:bg-gray-50 rounded-xl px-2 -mx-2">
+          <div class="text-sm text-gray-500">2026-01-27</div>
+          <div class="mt-1 font-medium">お知らせタイトル（仮）</div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ④ 2カラムのカード群（ずっと2列 / 以降積み下がり） -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <a href="#" class="rounded-2xl border border-gray-200 p-6 hover:bg-gray-50">
+        <h3 class="text-lg font-semibold">カード（左）</h3>
+        <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
+      </a>
+      <a href="#" class="rounded-2xl border border-gray-200 p-6 hover:bg-gray-50">
+        <h3 class="text-lg font-semibold">カード（右）</h3>
+        <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
+      </a>
+
+      <!-- 追加コンテンツはここに積み下がる -->
+      <a href="#" class="rounded-2xl border border-gray-200 p-6 hover:bg-gray-50">
+        <h3 class="text-lg font-semibold">カード（下段1）</h3>
+        <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
+      </a>
+      <a href="#" class="rounded-2xl border border-gray-200 p-6 hover:bg-gray-50">
+        <h3 class="text-lg font-semibold">カード（下段2）</h3>
+        <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
+      </a>
+    </section>
   </div>
 </Layout>
