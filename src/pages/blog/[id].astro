@@ -3,36 +3,44 @@ import { getBlogDetail, getCategoryList, getBlogList } from "@libs/microcms.ts";
 import Layout from "@layouts/Layout.astro";
 import BlogPost from "@components/BlogPost.astro";
 import CategoryList from "@components/CategoryList.astro";
+import TOC from "@components/TOC.astro";
 
-export const prerender = true;
+import {
+  microCMSRichEditorHandler,
+  syntaxHighlightingByShikiTransformer,
+  responsiveImageTransformer,
+  codeBlockFileNameTransformer,
+  tocExtractor,
+} from "microcms-rich-editor-handler";
 
-// ✅ 追加：静的生成する対象（id一覧）を返す
-export async function getStaticPaths() {
-  const { contents } = await getBlogList({ limit: 100 }); // 記事数が100超えるなら後で拡張
-  return contents.map((post) => ({
-    params: { id: post.id },
-  }));
-}
-
-const { id } = Astro.params;
-if (!id) throw new Error("id is required");
-
-// const url = new URL(Astro.url.href);
-// const draftKey = url.searchParams.get("draftKey");
-// 
-// const cachePolicies = {
-//   noCache: "no-store, no-cache, max-age=0, must-revalidate",
-//   publicIsr: "public, s-maxage=180, stale-while-revalidate=180",
-// };
-// 
-// const cachePolicy = draftKey ? cachePolicies.noCache : cachePolicies.publicIsr;
-// Astro.response.headers.set("Cache-Control", cachePolicy);
-// 
-// const blog = await getBlogDetail(id, draftKey ? { draftKey } : {});
+// ...既存の getStaticPaths / fetch blog などはそのまま...
 
 const blog = await getBlogDetail(id);
-
 const { contents: categories } = await getCategoryList();
+
+// ✅ ここで本文HTML化 + TOC抽出
+type TocItem = { id: string; text: string; level: number };
+let toc: TocItem[] = [];
+
+if (blog?.content) {
+  const { html: transformedHtml, data } = await microCMSRichEditorHandler(blog.content, {
+    transformers: [
+      responsiveImageTransformer(),
+      codeBlockFileNameTransformer({ attributes: { class: "fileName" } }),
+      syntaxHighlightingByShikiTransformer({
+        defaultHighlightOptions: { lang: "javascript", theme: "github-dark" },
+      }),
+    ],
+    extractors: {
+      toc: [
+        tocExtractor({ ignoreLevels: [4, 5] }),
+      ],
+    },
+  });
+
+  blog.content = transformedHtml;
+  toc = data.toc ?? [];
+}
 
 const Meta = {
   title: blog?.title ?? "記事が見つかりません",
@@ -42,15 +50,12 @@ const Meta = {
 };
 ---
 <Layout Meta={Meta}>
-  <div class="space-y-8">
-    {blog ? (
-      <BlogPost blog={blog} />
-    ) : (
-      <p>記事が見つかりません</p>
-    )}
+  <div slot="main" class="space-y-8">
+    {blog ? <BlogPost blog={blog} /> : <p>記事が見つかりません</p>}
   </div>
 
-  <div class="space-y-8">
+  <div slot="sidebar" class="space-y-8">
+    <TOC toc={toc} sticky={true} />
     <CategoryList categories={categories} />
   </div>
 </Layout>

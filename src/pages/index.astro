@@ -23,19 +23,20 @@ const Meta = {
 ---
 
 <Layout Meta={Meta}>
-  <header class="rounded-2xl bg-gray-50 p-6 md:p-10">
-    <h1 class="text-3xl font-bold">{settings?.title ?? "ヘルプセンター"}</h1>
-    <p class="mt-2 opacity-70">知りたいことを検索できます。</p>
-    <div class="mt-6">
-      <SearchBox />
-    </div>
-  </header>
+  <div slot="main">
+    <header class="rounded-2xl bg-gray-50 p-6 md:p-10">
+      <h1 class="text-3xl font-bold">{settings?.title ?? "ヘルプセンター"}</h1>
+      <p class="mt-2 opacity-70">知りたいことを検索できます。</p>
+      <div class="mt-6">
+        <SearchBox />
+      </div>
+    </header>
 
-  <main class="mt-10">
-    <!-- ここがメインコンテンツ -->
-    <div class="space-y-8">
-      <BlogList blogs={blogs} />
-      <Pagination totalCount={totalCount} />
-    </div>
-  </main>
+    <main class="mt-10">
+      <div class="space-y-8">
+        <BlogList blogs={blogs} />
+        <Pagination totalCount={totalCount} />
+      </div>
+    </main>
+  </div>
 </Layout>
