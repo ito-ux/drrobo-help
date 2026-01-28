@@ -4,12 +4,10 @@ import { microCMSRichEditorHandler } from "microcms-rich-editor-handler";
 
 export const prerender = true;
 
-// h1〜h6 を中身ごと削除
 function removeHeadings(html: string) {
   return html.replace(/<h[1-6][^>]*>[\s\S]*?<\/h[1-6]>/gi, " ");
 }
 
-// HTML -> テキスト（タグ除去 + 空白整形）
 function htmlToText(html: string) {
   return html
     .replace(/<style[\s\S]*?<\/style>/g, " ")
@@ -26,22 +24,39 @@ function htmlToText(html: string) {
 }
 
 export const GET: APIRoute = async () => {
-  const LIMIT = 1000; // ←まずはここ。問題なければ 2000 に上げる
-  const BODY_MAX = 1000; // ←本文は先頭1000文字だけ（重くしない）
+  const PER_PAGE = 100;      // microCMS上限
+  const MAX_TOTAL = 2000;    // 目標上限（安全のため）
+  const BODY_MAX = 1000;     // 本文は先頭だけ
 
-  const { contents } = await getBlogList({ limit: LIMIT });
+  let offset = 0;
+  let all: any[] = [];
+
+  while (true) {
+    const { contents, totalCount } = await getBlogList({
+      limit: PER_PAGE,
+      offset,
+    });
+
+    all = all.concat(contents);
+
+    offset += PER_PAGE;
+
+    // totalCount が返ってくるならそれで止める
+    if (offset >= totalCount) break;
+
+    // 念のため上限
+    if (all.length >= MAX_TOTAL) break;
+  }
 
   const index = await Promise.all(
-    contents.map(async (p) => {
-      // 本文（プレーンテキスト化 + 見出し除外）
+    all.map(async (p) => {
       let body = "";
+
       if (p?.content) {
-        // ここでは重いtransformerは使わない（検索用なので整形不要）
         const { html } = await microCMSRichEditorHandler(p.content, {
           transformers: [],
           extractors: {},
         });
-
         const noHeadings = removeHeadings(html);
         body = htmlToText(noHeadings).slice(0, BODY_MAX);
       }
@@ -50,12 +65,8 @@ export const GET: APIRoute = async () => {
         id: p.id,
         title: p.title ?? "",
         description: p.description ?? "",
-
-        // 検索の賢さ用
         category: p.category?.name ?? "",
-        tags: (p.tags ?? []).map((t) => t.name).join(" "),
-
-        // 本文（検索用）
+        tags: (p.tags ?? []).map((t: any) => t.name).join(" "),
         body,
       };
     })
