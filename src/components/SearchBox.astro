@@ -38,10 +38,20 @@ const placeholder = "キーワードで検索（例：CSV、初期設定）";
     const res = await fetch("/search-index.json");
     items = await res.json();
     fuse = new Fuse(items, {
-      includeScore: true,
-      threshold: 0.35,
-      keys: ["title", "description"],
-    });
+  includeScore: true,
+  threshold: 0.35,
+  ignoreLocation: true,
+  minMatchCharLength: 2,
+  keys: [
+    { name: "title", weight: 3.0 },
+    { name: "description", weight: 1.5 },
+    { name: "category", weight: 1.2 },
+    { name: "tags", weight: 1.0 },
+    { name: "body", weight: 0.8 }, // 本文は弱めに
+  ],
+});
+
+
   }
 
 function render(list) {
