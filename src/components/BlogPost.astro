@@ -6,51 +6,6 @@ import type { Category } from "@libs/microcms";
 const { blog } = Astro.props;
 ---
 
-
-type TocItem = {
-  id: string;
-  text: string;
-  level: number;
-};
-
-let html = "";
-let toc: TocItem[] = [];
-
-if (blog.content) {
-  const { html: transformedHtml, data } = await microCMSRichEditorHandler(
-    blog.content,
-    {
-      transformers: [
-        responsiveImageTransformer(),
-        codeBlockFileNameTransformer({
-          attributes: {
-            class: "fileName",
-          },
-        }),
-        syntaxHighlightingByShikiTransformer({
-          defaultHighlightOptions: {
-            lang: "javascript",
-            theme: "github-dark",
-          },
-        }),
-      ],
-      extractors: {
-        toc: [
-          tocExtractor({
-            ignoreLevels: [4, 5],
-          }),
-        ],
-      },
-    }
-  );
-
-  html = transformedHtml;
-  toc = data.toc;
-}
-
-blog.content = html;
----
-
 <article class="prose max-w-none">
   <h1 class="text-3xl font-medium mb-3 leading-normal">{blog.title}</h1>
 
@@ -74,7 +29,6 @@ blog.content = html;
       )
     }
   </div>
-
 
   <div set:html={blog.content} class="entry-content prose max-w-none" />
 </article>
