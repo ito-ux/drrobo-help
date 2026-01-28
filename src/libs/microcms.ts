@@ -37,6 +37,14 @@ export const getNoticeList = async (queries?: MicroCMSQueries) => {
   });
 };
 
+export const getNoticeDetail = async (contentId: string, queries?: MicroCMSQueries) => {
+  return client.getListDetail<Notice>({
+    endpoint: NOTICE_ENDPOINT,
+    contentId,
+    queries,
+  });
+};
+
 export const getImportantNotice = async () => {
   const res = await client.getList<Notice>({
     endpoint: NOTICE_ENDPOINT,

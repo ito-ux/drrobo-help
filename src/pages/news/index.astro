@@ -1,0 +1,35 @@
+---
+import Layout from "@layouts/Layout.astro";
+import { getNoticeList, getSettings } from "@libs/microcms.ts";
+
+export const prerender = true;
+
+const settings = await getSettings();
+const Meta = { title: `お知らせ | ${settings.title}` };
+
+const { contents: notices, totalCount } = await getNoticeList({
+  limit: 100, // microCMSは上限100。必要ならページング作る
+  orders: "-publishedAt",
+});
+---
+
+<Layout Meta={Meta}>
+  <div slot="main" class="space-y-6">
+    <h1 class="text-2xl font-bold">お知らせ</h1>
+
+    <ul class="divide-y divide-gray-200 border border-gray-200 rounded-xl bg-white">
+      {notices.map((n) => (
+        <li class="p-4">
+          <a class="font-medium hover:underline" href={`/news/${n.id}/`}>
+            {n.title ?? "（無題）"}
+          </a>
+          {n.publishedAt && (
+            <div class="mt-1 text-sm text-gray-500">{n.publishedAt.slice(0, 10)}</div>
+          )}
+        </li>
+      ))}
+    </ul>
+
+    <div class="text-sm text-gray-500">全{totalCount}件</div>
+  </div>
+</Layout>
