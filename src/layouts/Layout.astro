@@ -51,22 +51,28 @@ const mainClass = hasSidebar
     <link rel="canonical" href={url} />
   </head>
 
-  <body>
-    <Header title={siteTitle} />
+<body>
+  <Header title={siteTitle} />
 
-<main class={mainClass.replace("container mx-auto", "mx-auto w-full max-w-6xl")}>
-  <div>
-    <slot name="main" />
-  </div>
-
-  {hasSidebar && (
-    <aside>
-      <slot name="sidebar" />
-    </aside>
+  {Astro.slots.has("topbar") && (
+    <div>
+      <slot name="topbar" />
+    </div>
   )}
-</main>
 
+  <main class={mainClass.replace("container mx-auto", "mx-auto w-full max-w-6xl")}>
+    <div>
+      <slot name="main" />
+    </div>
 
-    <Footer title={siteTitle} />
-  </body>
+    {hasSidebar && (
+      <aside>
+        <slot name="sidebar" />
+      </aside>
+    )}
+  </main>
+
+  <Footer title={siteTitle} />
+</body>
+
 </html>
