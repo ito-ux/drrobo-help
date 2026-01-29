@@ -66,19 +66,14 @@ const Meta = {
     {blog ? <BlogPost blog={blog} /> : <p>記事が見つかりません</p>}
   </div>
 
+<!-- sidebar slot（TOCだけ） -->
 <div slot="sidebar" class="md:self-start">
-  <div class="md:sticky md:top-24">
-    <!-- sticky確認用：追従すればこの枠が常に見える -->
-    <div class="rounded-md border-2 border-red-400 bg-white p-2">
-      <div class="text-xs font-semibold text-red-600 mb-2">TOC sticky debug</div>
-
-      <div class="max-h-[calc(100vh-6rem)] overflow-auto pr-2">
-        <TOC toc={toc} sticky={false} />
-      </div>
+  <div class="md:sticky md:top-24 md:h-fit">
+    <div class="max-h-[calc(100vh-6rem)] overflow-auto pr-2">
+      <TOC toc={toc} sticky={false} />
     </div>
   </div>
 </div>
-
 
 
 
