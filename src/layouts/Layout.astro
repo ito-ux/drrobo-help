@@ -9,6 +9,7 @@ const settings = await getSettings();
 const siteTitle = settings.title;
 const siteDescription = settings.description;
 
+// URL/Meta
 const url = new URL(Astro.url.pathname, Astro.site);
 const isHome = Astro.url.pathname === "/";
 const { Meta } = Astro.props;
@@ -61,7 +62,8 @@ const mainClass = hasSidebar
   </head>
 
   <body class="min-h-screen flex flex-col">
-    <Header title={siteTitle} />
+    <!-- ✅ トップ以外でヘッダー検索を表示 -->
+    <Header title={siteTitle} showSearch={!isHome} />
 
     {Astro.slots.has("topbar") && (
       <div>
