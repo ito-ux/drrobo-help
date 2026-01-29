@@ -11,6 +11,40 @@ const Meta = {
   title: settings?.title || "Set Your Title Here",
 };
 
+const menuCards = [
+  {
+    title: "コマンド解説",
+    img: "/assets/images/top_menu_command.png",
+    href: "#",
+  },
+  {
+    title: "開発事例",
+    img: "/assets/images/top_menu_sample.png",
+    href: "#",
+  },
+  {
+    title: "トラブルシューティング",
+    img: "/assets/images/top_menu_trouble.png",
+    href: "#",
+  },
+  // 2周目（同じ画像をもう一回ずつ）
+  {
+    title: "コマンド解説",
+    img: "/assets/images/top_menu_command.png",
+    href: "#",
+  },
+  {
+    title: "開発事例",
+    img: "/assets/images/top_menu_sample.png",
+    href: "#",
+  },
+  {
+    title: "トラブルシューティング",
+    img: "/assets/images/top_menu_trouble.png",
+    href: "#",
+  },
+];
+
 // 重要：最新1件（なければnull）
 const importantRes = await getNoticeList({
   limit: 1,
@@ -80,23 +114,29 @@ const { contents: latestDocs } = await getBlogList({
       </div>
     </section>
 
-    <!-- ② カードだけ：グレー背景（ここだけグレーにする） -->
-    <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-gray-50">
-      <div class="mx-auto max-w-6xl px-4 md:px-6 py-10">
-        <!-- ✅ 白い箱は作らない：グレー地にカードが直接並ぶ -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <a
-              href="#"
-              class="rounded-lg border border-gray-200 bg-white p-6 hover:bg-gray-50 transition"
-            >
-              <h3 class="text-base font-semibold text-gray-900">カード（例）</h3>
-              <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
-            </a>
-          ))}
-        </section>
-      </div>
-    </section>
+<!-- ④ 画像カード（グレー背景はカードエリアだけ） -->
+<section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-gray-100/70">
+  <div class="mx-auto max-w-6xl px-4 md:px-6 py-10">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {menuCards.map((c) => (
+        <a
+          href={c.href}
+          class="group overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
+        >
+          <!-- 縦長比率：カード幅は今のまま、縦を伸ばす -->
+          <div class="aspect-[4/5]">
+            <img
+              src={c.img}
+              alt={c.title}
+              class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.01]"
+              loading="lazy"
+            />
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
 
     <!-- ③ お知らせ & 最新記事：白背景（フッターの直前に置く） -->
     <section class="mx-auto max-w-6xl px-4 md:px-6 py-12">
