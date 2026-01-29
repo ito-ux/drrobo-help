@@ -22,6 +22,12 @@ const Meta = {
   title: settings?.title || "Set Your Title Here",
 };
 
+const { contents: latestDocs } = await getBlogList({
+  limit: 5,
+  orders: "-publishedAt",
+});
+
+
 // 重要：最新1件（なければnull）
 const importantRes = await getNoticeList({
   limit: 1,
@@ -68,9 +74,9 @@ const notices = noticeRes.contents ?? [];
   )}
 
   <div slot="main">
-    <!-- ① 検索ヒーロー：full-bleed -->
+    <!-- ① 検索ヒーロー：full-bleed（重要帯にくっつける） -->
     <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-gradient-to-b from-sky-100 to-sky-200">
-      <div class="mx-auto max-w-6xl px-4 md:px-6 pt-10 md:pt-12 pb-8 md:pb-10">
+      <div class="mx-auto max-w-6xl px-4 md:px-6 pt-10 md:pt-12 pb-10 md:pb-12">
         <div class="text-center">
           <h1 class="text-3xl md:text-4xl font-semibold tracking-tight text-gray-900">
             どんなことにお困りですか？
@@ -86,73 +92,76 @@ const notices = noticeRes.contents ?? [];
       </div>
     </section>
 
-    <!-- ② メイン背景：full-bleed（ここが“グレーで染める”本体） -->
+    <!-- ② メイン背景：full-bleed（グレーは“全幅”で敷く） -->
     <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-gray-100/70">
-      <!-- ヒーローとくっつける（余白を作らない） -->
-      <div class="mx-auto max-w-6xl px-4 md:px-6 pt-0 pb-16">
-        <!-- ✅ “白い大枠”は作らない：左右の白ベタ化を防ぐ -->
-        <!-- ✅ セクションごとに白カード化する -->
-
-        <!-- お知らせ：白カード（中身だけ白） -->
-        <section class="bg-white border border-gray-200 border-t-0">
-          <div class="p-6 md:p-8">
-            <div class="flex items-center justify-between gap-4">
-              <h2 class="text-lg font-semibold text-gray-900">お知らせ</h2>
-              <a href="/news" class="text-sm font-medium text-gray-700 hover:underline">
-                過去のお知らせを見る →
+      <div class="mx-auto max-w-6xl px-4 md:px-6">
+        <!-- ここは “白い大枠” を作らない：グレー地を見せる -->
+        <div class="pt-0 pb-14">
+          <!-- ▼カード群（白カードだけ置く） -->
+          <section class="pt-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <a href="#" class="rounded-lg border border-gray-200 bg-white p-6 hover:bg-gray-50 transition">
+                <h3 class="text-base font-semibold text-gray-900">カード（例）</h3>
+                <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
+              </a>
+              <a href="#" class="rounded-lg border border-gray-200 bg-white p-6 hover:bg-gray-50 transition">
+                <h3 class="text-base font-semibold text-gray-900">カード（例）</h3>
+                <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
+              </a>
+              <a href="#" class="rounded-lg border border-gray-200 bg-white p-6 hover:bg-gray-50 transition">
+                <h3 class="text-base font-semibold text-gray-900">カード（例）</h3>
+                <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
               </a>
             </div>
+          </section>
 
-            <div class="mt-4 divide-y">
-              {notices.map((n) => (
-                <a
-                  href={`/news/${n.id}/`}
-                  class="block py-3 hover:bg-gray-50 px-2 -mx-2"
-                >
-                  <div class="text-xs text-gray-500">{n.publishedAt?.slice(0, 10)}</div>
-                  <div class="mt-1 text-sm font-medium text-gray-900">{n.title}</div>
+          <!-- ▼お知らせ＆最新記事：カードの“下”に移動、2カラム -->
+          <section class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 左：お知らせ -->
+            <div class="rounded-lg border border-gray-200 bg-white p-6">
+              <div class="flex items-center justify-between gap-4">
+                <h2 class="text-base font-semibold text-gray-900">お知らせ</h2>
+                <a href="/news" class="text-sm font-medium text-gray-700 hover:underline">
+                  過去のお知らせを見る →
                 </a>
-              ))}
+              </div>
+
+              <div class="mt-4 divide-y">
+                {notices.map((n) => (
+                  <a href={`/news/${n.id}/`} class="block py-3 hover:bg-gray-50 px-2 -mx-2 rounded-md">
+                    <div class="text-xs text-gray-500">{n.publishedAt?.slice(0, 10)}</div>
+                    <div class="mt-1 text-sm font-medium text-gray-900">{n.title}</div>
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
 
-        <!-- メニューカード群：背景はグレーのまま、カードだけ白 -->
-        <section class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <a
-            href="#"
-            class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-sm transition"
-          >
-            <h3 class="text-base font-semibold text-gray-900">カード（例）</h3>
-            <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
-          </a>
+            <!-- 右：最新記事（docs） -->
+            <div class="rounded-lg border border-gray-200 bg-white p-6">
+              <div class="flex items-center justify-between gap-4">
+                <h2 class="text-base font-semibold text-gray-900">最新記事</h2>
+                <a href="/docs" class="text-sm font-medium text-gray-700 hover:underline">
+                  すべて見る →
+                </a>
+              </div>
 
-          <a
-            href="#"
-            class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-sm transition"
-          >
-            <h3 class="text-base font-semibold text-gray-900">カード（例）</h3>
-            <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
-          </a>
+              <div class="mt-4 divide-y">
+                {latestDocs.map((p) => (
+                  <a href={`/docs/${p.id}/`} class="block py-3 hover:bg-gray-50 px-2 -mx-2 rounded-md">
+                    <div class="text-xs text-gray-500">{p.publishedAt?.slice(0, 10)}</div>
+                    <div class="mt-1 text-sm font-medium text-gray-900">{p.title ?? "（無題）"}</div>
+                  </a>
+                ))}
+              </div>
 
-          <a
-            href="#"
-            class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-sm transition"
-          >
-            <h3 class="text-base font-semibold text-gray-900">カード（例）</h3>
-            <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
-          </a>
-        </section>
-
-        <!-- ✅ 下向きシャドウ＋薄い罫線（“メイン領域の終わり”の演出） -->
-        <div class="mt-14 border-t border-gray-200"></div>
-        <div
-          class="relative"
-          aria-hidden="true"
-        >
-          <div class="absolute left-8 right-8 -top-1 h-6 rounded-[999px] bg-black/10 blur-xl opacity-15"></div>
+              {/* もし「更新日順が難しい」なら、この右枠はバナー枠に差し替えでOK */}
+            </div>
+          </section>
         </div>
       </div>
+
+      <!-- ③ メイン領域の“下端だけ”薄い罫線＋弱い下向きシャドウ（左右シャドウ無し） -->
+      <div class="border-t border-gray-200 shadow-[0_-12px_18px_-18px_rgba(0,0,0,0.35)]"></div>
     </section>
   </div>
 </Layout>
