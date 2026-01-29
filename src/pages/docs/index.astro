@@ -1,0 +1,30 @@
+---
+import Layout from "@layouts/Layout.astro";
+import BlogList from "@components/BlogList.astro";
+import { getBlogList } from "@libs/microcms.ts";
+import { LIMIT } from "@constants/index.ts";
+
+const Meta = {
+  title: "記事一覧",
+  description: "ヘルプ記事の一覧です。",
+};
+
+const { contents, totalCount } = await getBlogList({
+  limit: LIMIT,
+  offset: 0,
+});
+---
+
+<Layout Meta={Meta}>
+  <Fragment slot="main">
+    <h1 class="text-2xl font-bold mb-6">記事一覧</h1>
+    <BlogList blogs={contents} />
+
+    {/* 2ページ目以降があるならリンクだけ出す（まずは簡易） */}
+    {totalCount > LIMIT && (
+      <div class="mt-10">
+        <a class="underline" href="/docs/page/2">次へ →</a>
+      </div>
+    )}
+  </Fragment>
+</Layout>

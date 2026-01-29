@@ -5,31 +5,39 @@ import { LIMIT } from "@constants/index.ts";
 interface Props {
   totalCount: number;
   current?: number;
-  basePath?: string;
+  basePath?: string;       // 例: "" | "/docs" | "/news"
+  firstPageHref?: string;  // 例: "/" | "/docs" | "/news" | "/search"
   q?: string;
   category?: string;
 }
 
-const { totalCount, current = 1, basePath = "", q, category } = Astro.props;
-const totalPages = Math.ceil(totalCount / LIMIT);
+const {
+  totalCount,
+  current = 1,
+  basePath = "",
+  firstPageHref,
+  q,
+  category,
+} = Astro.props as Props;
 
-if (totalPages <= 1) {
-  return;
-}
+const totalPages = Math.ceil(totalCount / LIMIT);
+if (totalPages <= 1) return;
 
 const pages = Array.from({ length: totalPages }).map((_, i) => i + 1);
 
 const getPageUrl = (page: number) => {
-  let path;
+  let path: string;
 
   if (category) {
-    path =
-      page === 1 ? `/category/${category}` : `/category/${category}/p/${page}`;
+    // 既存仕様維持
+    path = page === 1 ? `/category/${category}` : `/category/${category}/p/${page}`;
   } else {
-    path = page === 1 ? "/" : `${basePath}/p/${page}`;
+    // ★ ここが拡張ポイント
+    const first = firstPageHref ?? (basePath || "/");
+    path = page === 1 ? first : `${basePath}/p/${page}`;
   }
 
-  return q ? `${path}?q=${q}` : path;
+  return q ? `${path}?q=${encodeURIComponent(q)}` : path;
 };
 ---
 
@@ -45,7 +53,7 @@ const getPageUrl = (page: number) => {
             {p}
           </a>
         ) : (
-          <span class="px-4 py-2 border border-blue-600 bg-blue-600 text-white rounded-md font-bold hover:bg-blue-700 transition">
+          <span class="px-4 py-2 border border-orange-500 bg-orange-500 text-white rounded-md font-bold">
             {p}
           </span>
         )}
