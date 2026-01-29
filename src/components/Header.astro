@@ -1,20 +1,19 @@
 ---
 // src/components/Header.astro
-const { showSearch = false } = Astro.props;
+import SearchBox from "@components/SearchBox.astro";
+
+const { title, showSearch = false } = Astro.props as {
+  title?: string;
+  showSearch?: boolean;
+};
 ---
 
 <header class="bg-black text-white border-b border-white/10">
   <div class="mx-auto w-full max-w-6xl px-4 md:px-6 py-4 flex items-center justify-between">
-    <!-- 左：ロゴ -->
     <a href="/" class="flex items-center gap-2">
-      <img
-        src="/assets/images/logo.png"
-        alt="Dr.Robo ヘルプセンター"
-        class="h-8 w-auto md:h-9"
-      />
+      <img src="/assets/images/logo.png" alt="Dr.Robo ヘルプセンター" class="h-8 w-auto md:h-9" />
     </a>
 
-    <!-- 右：検索欄（トップ以外で表示） -->
     {showSearch && (
       <div class="w-56 md:w-64">
         <SearchBox />
