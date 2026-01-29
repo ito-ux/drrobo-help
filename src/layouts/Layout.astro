@@ -18,18 +18,17 @@ const pageDescription = Meta.description ? Meta.description : siteDescription;
 const ogImage = Meta.image ? Meta.image : new URL("/assets/images/og.png", Astro.site);
 const ogType = Meta.ogType ? Meta.ogType : "blog";
 
-// ✅ sidebar slot が渡された時だけ 2カラムにする
+// sidebar slot が渡された時だけ 2カラムにする
 const hasSidebar = Astro.slots.has("sidebar");
 
-// ✅ Homeだけ main の上下余白を消す（topbar/heroをくっつける）
+// Homeだけ main の上下余白を消す
 const mainPaddingY = isHome ? "py-0" : "py-12";
 
 const mainClass = hasSidebar
   ? `flex-1 mx-auto w-full max-w-6xl px-4 md:px-6 ${mainPaddingY} grid grid-cols-1 md:grid-cols-[3fr_1fr] gap-8`
   : `flex-1 mx-auto w-full max-w-6xl px-4 md:px-6 ${mainPaddingY}`;
-
-
 ---
+
 <!doctype html>
 <html lang="ja">
   <head>
@@ -37,55 +36,51 @@ const mainClass = hasSidebar
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
+
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap"
       rel="stylesheet"
     />
+
     <meta property="og:site_name" content={siteTitle} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:image" content={ogImage} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={url} />
     <meta property="og:type" content={ogType} />
+
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:image" content={ogImage} />
+
     <link rel="canonical" href={url} />
   </head>
 
-<body>
-  <Header title={siteTitle} />
+  <body class="min-h-screen flex flex-col">
+    <Header title={siteTitle} />
 
-  {Astro.slots.has("topbar") && (
-    <div>
-      <slot name="topbar" />
-    </div>
-  )}
+    {Astro.slots.has("topbar") && (
+      <div>
+        <slot name="topbar" />
+      </div>
+    )}
 
-  <main class={mainClass.replace("container mx-auto", "mx-auto w-full max-w-6xl")}>
-    <div>
-      <slot name="main" />
-    </div>
+    <main class={mainClass}>
+      <div>
+        <slot name="main" />
+      </div>
 
-{hasSidebar && (
-  <aside class="self-start">
-    <slot name="sidebar" />
-  </aside>
-)}
+      {hasSidebar && (
+        <aside class="self-start md:sticky md:top-24 h-fit">
+          <slot name="sidebar" />
+        </aside>
+      )}
+    </main>
 
-  </main>
-
-  <Footer title={siteTitle} />
-
-  {Astro.slots.has("afterFooter") && (
-    <div>
-      <slot name="afterFooter" />
-    </div>
-  )}
-
-</body>
-
+    <Footer title={siteTitle} />
+  </body>
 </html>
