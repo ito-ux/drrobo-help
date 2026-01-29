@@ -1,10 +1,6 @@
 ---
 // src/components/TOC.astro
-type TocItem = {
-  id: string;
-  text: string;
-  level: number;
-};
+type TocItem = { id: string; text: string; level: number };
 
 const { toc, title = "目次", sticky = false } = Astro.props as {
   toc: TocItem[];
@@ -12,7 +8,6 @@ const { toc, title = "目次", sticky = false } = Astro.props as {
   sticky?: boolean;
 };
 
-// 型キャストをテンプレ内に持ち込まない（ここで用意）
 const levelClassMap: Record<number, string> = {
   2: "ml-3",
   3: "ml-6",
@@ -21,10 +16,10 @@ const levelClassMap: Record<number, string> = {
 
 {toc?.length > 0 && (
   <div class={sticky ? "sticky top-24" : ""}>
-    <div class="p-4 border border-gray-200 bg-gray-50 rounded-md shadow-sm">
+    <div class="p-4 border border-gray-200 bg-gray-50 rounded-md shadow-sm max-h-[calc(100vh-6rem)] overflow-auto">
       <h2 class="text-lg font-semibold text-gray-700 mb-2">{title}</h2>
 
-      <ul class="space-y-1 text-sm text-gray-600 max-h-[calc(100vh-10rem)] overflow-auto pr-2">
+      <ul class="space-y-1 text-sm text-gray-600">
         {toc.map((item) => {
           const levelClass = levelClassMap[item.level] ?? "";
           return (

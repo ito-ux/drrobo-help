@@ -66,8 +66,9 @@ const Meta = {
     {blog ? <BlogPost blog={blog} /> : <p>記事が見つかりません</p>}
   </div>
 
-<!-- sidebar slot（TOCだけ） -->
-<div slot="sidebar">
+<div slot="sidebar" class="space-y-8 md:self-start">
   <TOC toc={toc} title="目次" sticky={true} />
 </div>
+</Layout>
+
 
