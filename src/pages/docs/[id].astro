@@ -1,8 +1,7 @@
 ---
-import { getBlogDetail, getCategoryList, getBlogList } from "@libs/microcms.ts";
+import { getBlogDetail, getBlogList } from "@libs/microcms.ts";
 import Layout from "@layouts/Layout.astro";
 import BlogPost from "@components/BlogPost.astro";
-import CategoryList from "@components/CategoryList.astro";
 import TOC from "@components/TOC.astro";
 
 import {
@@ -31,7 +30,6 @@ const { id } = Astro.params;
 
 // ✅ 記事詳細・カテゴリ取得
 const blog = await getBlogDetail(id);
-const { contents: categories } = await getCategoryList();
 
 // ✅ 本文HTML化 + TOC抽出
 type TocItem = { id: string; text: string; level: number };
@@ -70,6 +68,5 @@ const Meta = {
 
   <div slot="sidebar" class="space-y-8">
     <TOC toc={toc} sticky={true} />
-    <CategoryList categories={categories} />
   </div>
 </Layout>
