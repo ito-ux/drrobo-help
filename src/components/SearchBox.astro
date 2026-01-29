@@ -1,8 +1,9 @@
 ---
 const placeholder = "キーワードで検索（例：CSV、初期設定）";
+const { compact = false } = Astro.props as { compact?: boolean };
 ---
 
-<div class="mx-auto w-full max-w-2xl">
+<div class={compact ? "w-full" : "mx-auto w-full max-w-2xl"}>
   <form action="/search" method="get" class="w-full">
     <div class="relative">
       <div class="flex items-stretch">
@@ -12,13 +13,17 @@ const placeholder = "キーワードで検索（例：CSV、初期設定）";
           name="q"
           placeholder={placeholder}
           autocomplete="off"
-          class="w-full rounded-l-full border border-gray-300 bg-white px-6 py-3 text-base
-                 focus:outline-none focus:ring-2 focus:ring-black/30"
+          class={`w-full border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500
+                 focus:outline-none focus:ring-2 focus:ring-orange-400
+                 ${compact ? "h-8 px-4 text-sm rounded-l-full" : "px-6 py-3 text-base rounded-l-full"}`}
         />
 
         <button
           type="submit"
-          class="shrink-0 rounded-r-full bg-black px-6 py-3 text-sm font-semibold text-white hover:bg-black/90"
+          class={`shrink-0 font-semibold text-white
+                 bg-orange-500 hover:bg-orange-600
+                 focus:outline-none focus:ring-2 focus:ring-orange-400
+                 ${compact ? "h-8 px-4 text-sm rounded-r-full" : "px-6 py-3 text-sm rounded-r-full"}`}
         >
           検索
         </button>
@@ -124,17 +129,14 @@ const placeholder = "キーワードで検索（例：CSV、初期設定）";
     }, 150);
   });
 
-  // ×ボタン/ESC/クリアなどで空になったら閉じる
   input.addEventListener("search", () => {
     if (!input.value.trim()) hideSuggest();
   });
 
-  // フォーカスが外れたら閉じる（クリック遷移の邪魔にならないよう少し遅延）
   input.addEventListener("blur", () => {
     setTimeout(() => hideSuggest(), 120);
   });
 
-  // クリックしたら閉じる（任意）
   document.addEventListener("click", (e) => {
     const within = e.target === input || resultEl.contains(e.target);
     if (!within) hideSuggest();
