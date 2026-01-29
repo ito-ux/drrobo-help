@@ -22,7 +22,7 @@ const Meta = {
   title: settings?.title || "Set Your Title Here",
 };
 
-const { contents: latestDocs } = await getBlogList({
+const { contents: latestPosts } = await getBlogList({
   limit: 5,
   orders: "-publishedAt",
 });
