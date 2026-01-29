@@ -123,20 +123,18 @@ const { contents: latestDocs } = await getBlogList({
           href={c.href}
           class="group overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
         >
-          <!-- 縦長比率は維持 -->
-          <div class="aspect-[4/5] flex items-center justify-center">
-            <img
-              src={c.img}
-              alt={c.title}
-              loading="lazy"
-              class="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
-            />
-          </div>
+          <img
+            src={c.img}
+            alt={c.alt ?? c.title}
+            class="w-full h-auto block"
+            loading="lazy"
+          />
         </a>
       ))}
     </div>
   </div>
 </section>
+
 
 
     <!-- ③ お知らせ & 最新記事：白背景（フッターの直前に置く） -->
