@@ -67,13 +67,14 @@ const Meta = {
   </div>
 
 <!-- src/pages/docs/[id].astro の sidebar slot を差し替え -->
-<div slot="sidebar" class="space-y-8 md:self-start">
+<div slot="sidebar" class="md:self-start">
   <div class="md:sticky md:top-24">
     <div class="max-h-[calc(100vh-6rem)] overflow-auto pr-2">
       <TOC toc={toc} sticky={false} />
     </div>
   </div>
 </div>
+
 
 
 </Layout>
