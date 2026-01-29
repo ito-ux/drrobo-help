@@ -14,22 +14,54 @@ const { contents: notices, totalCount } = await getNoticeList({
 ---
 
 <Layout Meta={Meta}>
-  <div slot="main" class="space-y-6">
-    <h1 class="text-2xl font-bold">お知らせ</h1>
+  {/* ✅ 重要なお知らせ帯：ここは今の構成を維持 */}
+  {importantNotice && (
+    <div slot="topbar" class="w-full">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-2">
+        <a
+          href={`/news/${importantNotice.id}/`}
+          class="block rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm"
+        >
+          <span class="font-semibold">重要:</span> {importantNotice.title}
+        </a>
+      </div>
+    </div>
+  )}
 
-    <ul class="divide-y divide-gray-200 border border-gray-200 rounded-xl bg-white">
-      {notices.map((n) => (
-        <li class="p-4">
-          <a class="font-medium hover:underline" href={`/news/${n.id}/`}>
-            {n.title ?? "（無題）"}
-          </a>
-          {n.publishedAt && (
-            <div class="mt-1 text-sm text-gray-500">{n.publishedAt.slice(0, 10)}</div>
-          )}
-        </li>
-      ))}
-    </ul>
+  {/* ✅ メインはここから：ヒーロー→お知らせ一覧 */}
+  <div slot="main" class="space-y-10">
+    <!-- Hero: 背景だけ full-bleed -->
+    <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-gradient-to-b from-sky-100 to-sky-200">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900">
+          お知らせ
+        </h1>
+        <p class="mt-2 text-sm text-gray-700">
+          最新情報やメンテナンス情報をお届けします。
+        </p>
+      </div>
+    </section>
 
-    <div class="text-sm text-gray-500">全{totalCount}件</div>
+    <!-- お知らせ一覧：コンテンツ幅＋影でリッチに -->
+    <section class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-10">
+      <div class="rounded-2xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.10)] ring-1 ring-black/5">
+        <div class="p-6 sm:p-8">
+          <ul class="divide-y divide-gray-200">
+            {notices.map((n) => (
+              <li class="py-4">
+                <a class="font-medium hover:underline" href={`/news/${n.id}/`}>
+                  {n.title ?? "（無題）"}
+                </a>
+                {n.publishedAt && (
+                  <div class="mt-1 text-sm text-gray-500">{n.publishedAt.slice(0, 10)}</div>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          <div class="mt-4 text-sm text-gray-500">全{totalCount}件</div>
+        </div>
+      </div>
+    </section>
   </div>
 </Layout>
