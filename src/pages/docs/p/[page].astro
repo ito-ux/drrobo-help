@@ -1,25 +1,40 @@
 ---
+import { getBlogList } from "@libs/microcms.ts";
 import Layout from "@layouts/Layout.astro";
 import Pagination from "@components/Pagination.astro";
-import { getBlogList, getSettings } from "@libs/microcms.ts";
 import { LIMIT } from "@constants/index.ts";
 
 export const prerender = true;
 
-const settings = await getSettings();
-const Meta = { title: `記事一覧 | ${settings.title}` };
+export async function getStaticPaths() {
+  const { totalCount } = await getBlogList({ limit: 1 });
+  const totalPages = Math.ceil(totalCount / LIMIT);
+
+  // /docs は1ページ目なので /docs/p/1 は作らない
+  return Array.from({ length: totalPages })
+    .map((_, i) => ({ params: { page: String(i + 1) } }))
+    .filter(({ params }) => params.page !== "1");
+}
+
+const currentPage = Number(Astro.params.page) || 1;
 
 const { contents: docs, totalCount } = await getBlogList({
   limit: LIMIT,
-  offset: 0,
+  offset: (currentPage - 1) * LIMIT,
   orders: "-publishedAt",
 });
+
+const Meta = {
+  title: `記事一覧（${currentPage}ページ目）`,
+  description: "ヘルプ記事の一覧です。",
+};
 ---
 
 <Layout Meta={Meta}>
   <div slot="main" class="space-y-6">
     <h1 class="text-2xl font-bold">記事一覧</h1>
 
+    {/* ニュース一覧と同じ見た目 */}
     <ul class="divide-y divide-gray-200 border border-gray-200 rounded-xl bg-white">
       {docs.map((d) => (
         <li class="p-4">
@@ -35,7 +50,12 @@ const { contents: docs, totalCount } = await getBlogList({
       ))}
     </ul>
 
-    <Pagination totalCount={totalCount} current={1} basePath="/docs" firstPageHref="/docs" />
+    <Pagination
+      totalCount={totalCount}
+      current={currentPage}
+      basePath="/docs"
+      firstPageHref="/docs"
+    />
 
     <div class="text-sm text-gray-500">全{totalCount}件</div>
   </div>
