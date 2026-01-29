@@ -3,20 +3,16 @@
 const { title } = Astro.props;
 ---
 
+
 <footer class="bg-white border-t">
   <div class="mx-auto w-full max-w-6xl px-4 md:px-6 py-6 flex items-center justify-between gap-6">
     <div class="flex items-center gap-3">
-      <!-- ロゴ画像があるなら差し替えOK -->
-      <!-- <img src="/assets/images/logo_drrobo_color.png" alt="Dr.Robo" class="h-6 w-auto" /> -->
-      <span class="text-lg font-semibold text-gray-900">Dr.Robo</span>
-
+      <img src="/assets/images/logo_drrobo_color.png" alt="Dr.Robo" class="h-6 w-auto" />
       <p class="text-sm text-gray-500">
         &copy; {new Date().getFullYear()} {title}
       </p>
     </div>
 
-    <a href="/about" class="text-sm font-medium text-gray-700 hover:underline">
-      About
-    </a>
+    <a href="/about" class="text-sm font-medium text-gray-700 hover:underline">About</a>
   </div>
 </footer>

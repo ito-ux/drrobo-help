@@ -70,11 +70,12 @@ const mainClass = hasSidebar
       <slot name="main" />
     </div>
 
-    {hasSidebar && (
-      <aside>
-        <slot name="sidebar" />
-      </aside>
-    )}
+{hasSidebar && (
+  <aside class="self-start">
+    <slot name="sidebar" />
+  </aside>
+)}
+
   </main>
 
   <Footer title={siteTitle} />
