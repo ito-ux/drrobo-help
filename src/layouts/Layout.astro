@@ -78,6 +78,13 @@ const mainClass = hasSidebar
   </main>
 
   <Footer title={siteTitle} />
+
+  {Astro.slots.has("afterFooter") && (
+    <div>
+      <slot name="afterFooter" />
+    </div>
+  )}
+
 </body>
 
 </html>
