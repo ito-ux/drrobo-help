@@ -68,8 +68,6 @@ const Meta = {
 
 <!-- sidebar slot（TOCだけ） -->
 <div slot="sidebar">
-  <div class="sticky top-24">
-    <TOC toc={toc} title="目次" />
-  </div>
+  <TOC toc={toc} title="目次" sticky={true} />
 </div>
-</Layout>
+
