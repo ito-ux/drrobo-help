@@ -7,6 +7,11 @@ body {
   text-underline-offset: 0.3em;
 }
 
+html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+}
+
 /* 段落 */
 .entry-content p {
   @apply mb-4 leading-relaxed;
