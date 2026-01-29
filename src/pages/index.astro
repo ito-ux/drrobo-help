@@ -92,7 +92,11 @@ const notices = noticeRes.contents ?? [];
       <!-- ✅ ヒーローに“くっつける”：上余白ほぼゼロ -->
       <div class="pt-0 pb-16">
         <!-- ✅ メインコンテンツ枠：角丸なし（上下も角丸にしない） -->
-        <div class="bg-white border-b border-gray-200 shadow-[0_12px_20px_rgba(0,0,0,0.08)]">
+        <div class="relative bg-white border-b border-gray-200
+         after:content-[''] after:absolute after:left-6 after:right-6 after:bottom-[-18px]
+         after:h-6 after:rounded-[999px] after:bg-black/10 after:blur-xl after:opacity-20
+         after:pointer-events-none">
+
           <div class="p-6 md:p-10 space-y-10">
             <!-- お知らせ：角丸なし（枠の中でセクション区切りにする） -->
             <section class="border-b border-gray-200 pb-8">
