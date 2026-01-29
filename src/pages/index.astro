@@ -1,32 +1,15 @@
 ---
-import { getBlogList, getCategoryList } from "@libs/microcms.ts";
 import Layout from "@layouts/Layout.astro";
-import BlogList from "@components/BlogList.astro";
-import Pagination from "@components/Pagination.astro";
-import CategoryList from "@components/CategoryList.astro";
-import { LIMIT } from "@constants/index.ts";
-import { getSettings } from "@libs/microcms.ts";
-import { getNoticeList } from "@libs/microcms.ts"; // ← あなたのlibs側に合わせて
 import SearchBox from "@components/SearchBox.astro";
+import { getSettings, getNoticeList, getBlogList } from "@libs/microcms.ts";
+
 export const prerender = true;
 
 const settings = await getSettings();
 
-const { contents: blogs, totalCount } = await getBlogList({
-  limit: LIMIT,
-});
-
-const { contents: categories } = await getCategoryList();
-
 const Meta = {
   title: settings?.title || "Set Your Title Here",
 };
-
-const { contents: latestPosts } = await getBlogList({
-  limit: 5,
-  orders: "-publishedAt",
-});
-
 
 // 重要：最新1件（なければnull）
 const importantRes = await getNoticeList({
@@ -36,15 +19,21 @@ const importantRes = await getNoticeList({
 });
 const importantNotice = importantRes.contents?.[0] ?? null;
 
-// 通常：最新5件（重要も混ざると嫌なら除外する）
+// お知らせ：最新（重要は除外）
 const noticeRes = await getNoticeList({
   limit: 5,
   orders: "-publishedAt",
-  // 重要をお知らせ欄に出したくない場合はこれ
   filters: "isImportant[not_equals]true",
 });
 const notices = noticeRes.contents ?? [];
+
+// 最新記事（docs/blog系の最新5件）
+const { contents: latestDocs } = await getBlogList({
+  limit: 5,
+  orders: "-publishedAt",
+});
 ---
+
 <Layout Meta={Meta}>
   {importantNotice && (
     <div slot="topbar" class="bg-sky-50 border-b border-sky-200">
@@ -75,7 +64,7 @@ const notices = noticeRes.contents ?? [];
   <div slot="main">
     <!-- ① 検索ヒーロー：full-bleed -->
     <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-gradient-to-b from-sky-100 to-sky-200">
-      <div class="mx-auto max-w-6xl px-4 md:px-6 pt-10 md:pt-12 pb-8 md:pb-10">
+      <div class="mx-auto max-w-6xl px-4 md:px-6 pt-10 md:pt-12 pb-6 md:pb-8">
         <div class="text-center">
           <h1 class="text-3xl md:text-4xl font-semibold tracking-tight text-gray-900">
             どんなことにお困りですか？
@@ -91,38 +80,29 @@ const notices = noticeRes.contents ?? [];
       </div>
     </section>
 
-    <!-- ② カードだけ灰色背景：full-bleed -->
-    <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-gray-100/70">
+    <!-- ② カードだけ：グレー背景（ここだけグレーにする） -->
+    <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-gray-50">
       <div class="mx-auto max-w-6xl px-4 md:px-6 py-10">
-        <!-- 枠は白、角丸は弱め -->
-        <div class="bg-white ring-1 ring-black/5 shadow-sm">
-          <div class="p-6 md:p-10">
-            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <a href="#" class="rounded-lg border border-gray-200 p-6 hover:bg-gray-50 transition">
-                <h3 class="text-base font-semibold text-gray-900">カード（例）</h3>
-                <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
-              </a>
-              <a href="#" class="rounded-lg border border-gray-200 p-6 hover:bg-gray-50 transition">
-                <h3 class="text-base font-semibold text-gray-900">カード（例）</h3>
-                <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
-              </a>
-              <a href="#" class="rounded-lg border border-gray-200 p-6 hover:bg-gray-50 transition">
-                <h3 class="text-base font-semibold text-gray-900">カード（例）</h3>
-                <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
-              </a>
-            </section>
-          </div>
-        </div>
+        <!-- ✅ 白い箱は作らない：グレー地にカードが直接並ぶ -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <a
+              href="#"
+              class="rounded-lg border border-gray-200 bg-white p-6 hover:bg-gray-50 transition"
+            >
+              <h3 class="text-base font-semibold text-gray-900">カード（例）</h3>
+              <p class="mt-2 text-sm text-gray-600">説明テキスト</p>
+            </a>
+          ))}
+        </section>
       </div>
     </section>
-  </div>
 
-  <!-- ③ フッターの“下”に置く：お知らせ / 最新記事（2列） -->
-  <div slot="afterFooter" class="bg-white">
-    <div class="mx-auto max-w-6xl px-4 md:px-6 py-10">
-      <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- ③ お知らせ & 最新記事：白背景（フッターの直前に置く） -->
+    <section class="mx-auto max-w-6xl px-4 md:px-6 py-12">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- お知らせ -->
-        <div class="rounded-xl border border-gray-200 bg-white p-6">
+        <section class="rounded-2xl border border-gray-200 bg-white p-6">
           <div class="flex items-center justify-between gap-4">
             <h2 class="text-lg font-semibold text-gray-900">お知らせ</h2>
             <a href="/news" class="text-sm font-medium text-gray-700 hover:underline">
@@ -138,10 +118,10 @@ const notices = noticeRes.contents ?? [];
               </a>
             ))}
           </div>
-        </div>
+        </section>
 
         <!-- 最新記事 -->
-        <div class="rounded-xl border border-gray-200 bg-white p-6">
+        <section class="rounded-2xl border border-gray-200 bg-white p-6">
           <div class="flex items-center justify-between gap-4">
             <h2 class="text-lg font-semibold text-gray-900">最新記事</h2>
             <a href="/docs" class="text-sm font-medium text-gray-700 hover:underline">
@@ -150,15 +130,15 @@ const notices = noticeRes.contents ?? [];
           </div>
 
           <div class="mt-4 divide-y">
-            {latestPosts.map((p) => (
+            {latestDocs.map((p) => (
               <a href={`/docs/${p.id}/`} class="block py-3 hover:bg-gray-50 rounded-lg px-2 -mx-2">
                 <div class="text-xs text-gray-500">{p.publishedAt?.slice(0, 10)}</div>
                 <div class="mt-1 text-sm font-medium text-gray-900">{p.title}</div>
               </a>
             ))}
           </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
+    </section>
   </div>
 </Layout>
