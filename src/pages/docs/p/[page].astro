@@ -1,46 +1,42 @@
 ---
-import { getBlogList } from "@libs/microcms.ts";
 import Layout from "@layouts/Layout.astro";
-import BlogList from "@components/BlogList.astro";
 import Pagination from "@components/Pagination.astro";
+import { getBlogList, getSettings } from "@libs/microcms.ts";
 import { LIMIT } from "@constants/index.ts";
 
 export const prerender = true;
 
-export async function getStaticPaths() {
-  const { totalCount } = await getBlogList({ limit: 1 });
-  const totalPages = Math.ceil(totalCount / LIMIT);
+const settings = await getSettings();
+const Meta = { title: `記事一覧 | ${settings.title}` };
 
-  // /docs/p/1 は作らず、/docs を1ページ目にする
-  return Array.from({ length: totalPages })
-    .map((_, i) => ({ params: { page: String(i + 1) } }))
-    .filter(({ params }) => params.page !== "1");
-}
-
-const currentPage = Number(Astro.params.page) || 1;
-
-const { contents: blogs, totalCount } = await getBlogList({
+const { contents: docs, totalCount } = await getBlogList({
   limit: LIMIT,
-  offset: (currentPage - 1) * LIMIT,
+  offset: 0,
+  orders: "-publishedAt",
 });
-
-const Meta = {
-  title: `記事一覧（${currentPage}ページ目）`,
-  description: "ヘルプ記事の一覧です。",
-};
 ---
 
 <Layout Meta={Meta}>
-  <Fragment slot="main">
-    <div class="space-y-8">
-      <BlogList blogs={blogs} />
+  <div slot="main" class="space-y-6">
+    <h1 class="text-2xl font-bold">記事一覧</h1>
 
-      <Pagination
-        totalCount={totalCount}
-        current={currentPage}
-        basePath="/docs"
-        firstPageHref="/docs"
-      />
-    </div>
-  </Fragment>
+    <ul class="divide-y divide-gray-200 border border-gray-200 rounded-xl bg-white">
+      {docs.map((d) => (
+        <li class="p-4">
+          <a class="font-medium hover:underline" href={`/docs/${d.id}/`}>
+            {d.title ?? "（無題）"}
+          </a>
+          {(d.publishedAt || d.createdAt) && (
+            <div class="mt-1 text-sm text-gray-500">
+              {(d.publishedAt ?? d.createdAt).slice(0, 10)}
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+
+    <Pagination totalCount={totalCount} current={1} basePath="/docs" firstPageHref="/docs" />
+
+    <div class="text-sm text-gray-500">全{totalCount}件</div>
+  </div>
 </Layout>

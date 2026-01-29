@@ -1,30 +1,42 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import BlogList from "@components/BlogList.astro";
-import { getBlogList } from "@libs/microcms.ts";
+import Pagination from "@components/Pagination.astro";
+import { getBlogList, getSettings } from "@libs/microcms.ts";
 import { LIMIT } from "@constants/index.ts";
 
-const Meta = {
-  title: "記事一覧",
-  description: "ヘルプ記事の一覧です。",
-};
+export const prerender = true;
 
-const { contents, totalCount } = await getBlogList({
+const settings = await getSettings();
+const Meta = { title: `記事一覧 | ${settings.title}` };
+
+const { contents: docs, totalCount } = await getBlogList({
   limit: LIMIT,
   offset: 0,
+  orders: "-publishedAt",
 });
 ---
 
 <Layout Meta={Meta}>
-  <Fragment slot="main">
-    <h1 class="text-2xl font-bold mb-6">記事一覧</h1>
-    <BlogList blogs={contents} />
+  <div slot="main" class="space-y-6">
+    <h1 class="text-2xl font-bold">記事一覧</h1>
 
-    {/* 2ページ目以降があるならリンクだけ出す（まずは簡易） */}
-    {totalCount > LIMIT && (
-      <div class="mt-10">
-        <a class="underline" href="/docs/page/2">次へ →</a>
-      </div>
-    )}
-  </Fragment>
+    <ul class="divide-y divide-gray-200 border border-gray-200 rounded-xl bg-white">
+      {docs.map((d) => (
+        <li class="p-4">
+          <a class="font-medium hover:underline" href={`/docs/${d.id}/`}>
+            {d.title ?? "（無題）"}
+          </a>
+          {(d.publishedAt || d.createdAt) && (
+            <div class="mt-1 text-sm text-gray-500">
+              {(d.publishedAt ?? d.createdAt).slice(0, 10)}
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+
+    <Pagination totalCount={totalCount} current={1} basePath="/docs" firstPageHref="/docs" />
+
+    <div class="text-sm text-gray-500">全{totalCount}件</div>
+  </div>
 </Layout>
