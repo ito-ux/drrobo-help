@@ -59,6 +59,41 @@ export const getImportantNotice = async () => {
 };
 
 /* =========================
+   コマンドグループ（comgr）
+========================= */
+
+export type CommandGroup = {
+  name: string;     // 表示名（例：Web操作）
+  slug: string;     // スラッグ（例：web）
+  order: number;    // 並び順（例：10）
+} & MicroCMSListContent;
+
+const COMGR_ENDPOINT = "comgr";
+
+export const getComgrList = async (queries?: MicroCMSQueries) => {
+  return client.getList<CommandGroup>({
+    endpoint: COMGR_ENDPOINT,
+    queries: {
+      orders: "order",
+      ...queries,
+    },
+  });
+};
+
+export type Blog = {
+  title: string;
+  description?: string;
+  content: string;
+  thumbnail?: MicroCMSImage;
+  category?: Category[];
+
+  // 追加：コマンドグループ参照（複数）
+  comgr?: CommandGroup[];
+} & MicroCMSListContent;
+
+
+
+/* =========================
    ヘルプ記事（docs）
 ========================= */
 

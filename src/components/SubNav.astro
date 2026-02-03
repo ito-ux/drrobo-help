@@ -1,0 +1,112 @@
+---
+type Item = { label: string; href: string };
+
+const { items, currentPath, activeHref } = Astro.props as {
+  items: Item[];
+  currentPath: string;
+  activeHref?: string; // ★追加：現在地を強制したいときに使う
+};
+
+// 末尾スラッシュゆれを吸収
+const norm = (p: string) => (p.endsWith("/") ? p : `${p}/`);
+
+// docs配下などで「コマンド一覧配下として扱う」など、現在地を上書きできる
+const activePath = norm(activeHref ?? currentPath);
+
+// /commands や /commands/xxx を「同じタブ扱い」
+const isActive = (href: string) => {
+  const h = norm(href);
+  return activePath === h || (h !== "/" && activePath.startsWith(h));
+};
+---
+
+<nav class="subnav" aria-label="セクションナビ">
+  <ul class="subnav__list">
+    {items.map((it) => {
+      const active = isActive(it.href);
+      return (
+        <li class="subnav__item">
+          <a
+            class:list={["subnav__link", active && "is-active"]}
+            href={it.href}
+            aria-current={active ? "page" : undefined}
+          >
+            {it.label}
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+</nav>
+
+<style>
+.subnav{
+  width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.subnav__list{
+  display:flex;
+  gap:18px;
+
+  /* 帯の下端に吸着させたいので “下” の余白はゼロにする */
+  padding:12px 0 0;
+  margin:0;
+  list-style:none;
+  min-width:max-content;
+
+  /* これ重要：帯の下端に下線を吸着させるため */
+  align-items:flex-end;
+}
+
+.subnav__item{
+  /* ここで下線の高さを確保しやすくする */
+  display:flex;
+  align-items:flex-end;
+}
+
+/* 文字の見た目 */
+.subnav__link{
+  display:inline-flex;
+  align-items:center;
+  height:34px;
+  padding:0 2px;
+  text-decoration:none;
+
+  font-size:13px;
+  font-weight:500;
+  color:rgba(8, 47, 73, 0.75);
+
+  background:transparent;
+  border:0;
+  white-space:nowrap;
+}
+
+/* hover（下線は item 側で出すので、文字色だけ） */
+.subnav__link:hover{
+  color:rgba(149, 160, 167, 0.9);
+}
+
+/* ✅ 下線は “li” に持たせる（帯の下端に吸着できる） */
+.subnav__item{
+  border-bottom: 2px solid transparent;
+}
+
+/* hover時の薄い下線 */
+.subnav__item:has(.subnav__link:hover){
+  border-bottom: 5px solid rgba(8, 47, 73, 0.25);
+}
+
+/* 現在地：5px下線（吸着） */
+.subnav__item:has(.subnav__link.is-active){
+  border-bottom: 5px solid rgba(2, 132, 199, 0.9);
+}
+
+/* 現在地の文字 */
+.subnav__link.is-active{
+  color:rgba(8, 47, 73, 1);
+  font-weight:600;
+}
+
+</style>

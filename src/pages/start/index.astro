@@ -1,0 +1,230 @@
+---
+import Layout from "@layouts/Layout.astro";
+import { getBlogList, getComgrList } from "@libs/microcms.ts";
+
+export const prerender = true;
+
+const subnavItems = [
+  { label: "スタートガイド", href: "/start/" },
+  { label: "コマンド一覧", href: "/commands/" },
+  { label: "コンソール", href: "/console/" },
+  { label: "開発事例", href: "/cases/" },
+  { label: "トラブルシューティング", href: "/troubleshooting/" },
+];
+
+const Meta = {
+  title: "コマンド一覧",
+  description: "よくある質問や、つまずきがちなポイントを紹介します。",
+};
+
+// ① グループ（マスタ）
+const { contents: groupsRaw } = await getComgrList({ limit: 100 });
+
+// ② コマンド記事（docs）
+const { contents: postsRaw } = await getBlogList({ limit: 100 });
+
+// ③ 整形
+const groups = (groupsRaw ?? []).map((g) => ({
+  id: g.id,
+  name: g.name,
+  slug: g.slug,
+  order: g.order ?? 999,
+}));
+
+const posts = (postsRaw ?? []).map((p) => ({
+  id: p.id,
+  title: p.title,
+  groupSlugs: (p.comgr ?? []).map((g) => g.slug).filter(Boolean),
+}));
+
+// ④ 表示用：order順のグループ
+const orderedGroups = [...groups].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+
+// ⑤ slug -> posts のバケツ（最初に一致したグループにだけ入れる）
+const bucket = new Map<string, typeof posts>();
+orderedGroups.forEach((g) => bucket.set(g.slug, []));
+
+const others: typeof posts = [];
+
+posts.forEach((p) => {
+  const first = (p.groupSlugs ?? []).find((s) => bucket.has(s));
+  if (first) bucket.get(first)!.push(p);
+  else others.push(p);
+});
+
+// ⑥ 描画用の配列（空グループは除外）
+const grouped = orderedGroups
+  .map((g) => ({
+    slug: g.slug,
+    name: g.name,
+    items: bucket.get(g.slug) ?? [],
+  }))
+  .filter((g) => g.items.length > 0);
+---
+
+<Layout
+  Meta={Meta}
+  mainPaddingY="pt-0 pb-0"
+  subnav={{
+    items: subnavItems,
+    currentPath: Astro.url.pathname,
+    activeHref: "/start/",
+  }}
+>
+  <!-- ✅ topbar：ヒーローだけ（SubNavはLayout側で描画） -->
+  <div slot="topbar">
+    <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-white border-b border-gray-200 shadow-[0_2px_6px_rgba(15,23,42,0.06)]">
+      <div class="mx-auto w-full max-w-6xl px-4 md:px-6 pt-6 pb-6">
+        <h1 class="text-2xl md:text-3xl font-semibold text-sky-950">スタートガイド</h1>
+        <p class="mt-2 text-sm md:text-base text-sky-950/70">
+          Dr.Roboをはじめて利用する方向けの情報をまとめています。
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <div slot="main">
+    <!--
+      ✅ ここが重要：
+      - 表示件数が少なくても縦罫線が短くならないように、grid自体に最低高さを持たせる
+      - 200px は「ヘッダー/サブナビ/ヒーロー分のざっくり控除」
+        （気になるなら 160〜260 の間で微調整）
+    -->
+    <section class="grid grid-cols-1 md:grid-cols-[232px_1fr] gap-6 min-h-[calc(100vh-200px)]">
+      <!-- 左カラム：罫線は右カラム側で引くので、ここは余白だけ -->
+      <aside class="md:pr-8">
+        <!-- 文字だけ余白（罫線に影響しない） -->
+        <div class="pt-6">
+          <div class="text-sm font-semibold text-gray-900 mb-3">絞り込み</div>
+
+          <div class="mt-2 space-y-1">
+            {orderedGroups.map((g) => (
+              <label class="flex items-center gap-2 text-sm py-2">
+                <input type="checkbox" data-group={g.slug} class="h-4 w-4" />
+                <span>{g.name}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </aside>
+
+      <!-- 右カラム：境界線（左罫線）＋余白 -->
+      <div class="md:border-l md:border-gray-200 md:pl-8 min-w-0">
+        <!-- 文字だけ余白（罫線に影響しない） -->
+        <div class="pt-6">
+          <div id="count" class="text-sm text-gray-600 text-right"></div>
+
+          <div id="list" class="mt-3">
+            {grouped.map((g) => (
+              <!-- ✅ 下余白を消して、フッター前の“白い空間”を作らない -->
+              <section data-section={g.slug} class="pt-8 pb-0">
+                <div class="text-base font-semibold text-gray-900 pb-3 border-b border-gray-200">
+                  {g.name}
+                </div>
+
+                <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2">
+                  {g.items.map((p) => (
+                    <a
+                      href={`/docs/${p.id}/`}
+                      data-card
+                      data-groups={(p.groupSlugs ?? []).join(" ")}
+                      class="
+                        block rounded-md px-3 py-2
+                        transition
+                        hover:bg-gray-100
+                        focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400
+                      "
+                    >
+                      <span class="mr-2 text-gray-400">›</span>
+                      <span class="text-sm font-medium text-gray-900">{p.title}</span>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            ))}
+
+            {others.length > 0 ? (
+              <section class="pt-8 pb-0" data-section="others">
+                <div class="text-base font-semibold text-gray-500 pb-3 border-b border-gray-200">
+                  その他
+                </div>
+
+                <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2">
+                  {others.map((p) => (
+                    <a
+                      href={`/docs/${p.id}/`}
+                      data-card
+                      data-groups={(p.groupSlugs ?? []).join(" ")}
+                      class="
+                        block rounded-md px-3 py-2
+                        transition
+                        hover:bg-gray-100
+                        focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400
+                      "
+                    >
+                      <span class="mr-2 text-gray-400">›</span>
+                      <span class="text-sm font-medium text-gray-900">{p.title}</span>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- フィルタ（表示/非表示） + 件数一致 -->
+    <script is:inline>
+      (() => {
+        const count = document.getElementById("count");
+        const checks = Array.from(document.querySelectorAll('input[data-group]'));
+        const cards = Array.from(document.querySelectorAll('[data-card]'));
+        const sections = Array.from(document.querySelectorAll('[data-section]'));
+
+        if (!count) return;
+
+        const getSelected = () =>
+          checks
+            .filter((c) => c.checked)
+            .map((c) => c.getAttribute("data-group"))
+            .filter(Boolean);
+
+        const updateCountAndSections = () => {
+          const visibleCards = cards.filter((c) => !c.classList.contains("hidden"));
+          count.textContent = `全 ${visibleCards.length} 件`;
+
+          sections.forEach((sec) => {
+            const secCards = Array.from(sec.querySelectorAll('[data-card]'));
+            const anyVisible = secCards.some((c) => !c.classList.contains("hidden"));
+            sec.classList.toggle("hidden", !anyVisible);
+          });
+        };
+
+        const apply = () => {
+          const selected = getSelected();
+
+          if (!selected.length) {
+            cards.forEach((c) => c.classList.remove("hidden"));
+            updateCountAndSections();
+            return;
+          }
+
+          cards.forEach((c) => {
+            const groups = (c.getAttribute("data-groups") || "")
+              .split(/\s+/)
+              .filter(Boolean);
+
+            const hit = groups.some((g) => selected.includes(g));
+            c.classList.toggle("hidden", !hit);
+          });
+
+          updateCountAndSections();
+        };
+
+        checks.forEach((c) => c.addEventListener("change", apply));
+        apply();
+      })();
+    </script>
+  </div>
+</Layout>

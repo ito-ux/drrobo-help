@@ -3,6 +3,7 @@
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import { getSettings } from "@libs/microcms.ts";
+import SubNav from "@components/SubNav.astro";
 import "@styles/global.css";
 
 const settings = await getSettings();
@@ -12,7 +13,23 @@ const siteDescription = settings.description;
 // URL/Meta
 const url = new URL(Astro.url.pathname, Astro.site);
 const isHome = Astro.url.pathname === "/";
-const { Meta } = Astro.props;
+
+const {
+  Meta,
+  subnav,
+  mainPaddingY: mainPaddingYProp, // ★ alias で受け取る
+} = Astro.props as {
+  Meta: any;
+  mainPaddingY?: string;
+  subnav?: {
+    items: { label: string; href: string }[];
+    currentPath: string;
+    activeHref?: string;
+  };
+};
+
+// Homeだけ main の上下余白を消す（ただしページ指定があればそちらを優先）
+const mainPaddingY = mainPaddingYProp ?? (isHome ? "py-0" : "py-12");
 
 const pageTitle = isHome ? siteTitle : `${Meta.title} | ${siteTitle}`;
 const pageDescription = Meta.description ? Meta.description : siteDescription;
@@ -21,9 +38,6 @@ const ogType = Meta.ogType ? Meta.ogType : "blog";
 
 // sidebar slot が渡された時だけ 2カラムにする
 const hasSidebar = Astro.slots.has("sidebar");
-
-// Homeだけ main の上下余白を消す
-const mainPaddingY = isHome ? "py-0" : "py-12";
 
 const mainClass = hasSidebar
   ? `flex-1 mx-auto w-full max-w-6xl px-4 md:px-6 ${mainPaddingY} grid grid-cols-1 md:grid-cols-[3fr_1fr] gap-8`
@@ -61,9 +75,22 @@ const mainClass = hasSidebar
     <link rel="canonical" href={url} />
   </head>
 
-  <body class="min-h-screen flex flex-col">
+  <body class="min-h-screen flex flex-col overflow-x-clip">
     <!-- ✅ トップ以外でヘッダー検索を表示 -->
     <Header title={siteTitle} showSearch={!isHome} />
+
+    {/* ✅ 共通サブナビ（propsで渡されたときだけ表示） */}
+    {subnav && (
+      <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-gray-100 border-b border-gray-200">
+        <div class="mx-auto w-full max-w-6xl px-4 md:px-6">
+          <SubNav
+            items={subnav.items}
+            currentPath={subnav.currentPath}
+            activeHref={subnav.activeHref}
+          />
+        </div>
+      </section>
+    )}
 
     {Astro.slots.has("topbar") && (
       <div>
@@ -84,5 +111,62 @@ const mainClass = hasSidebar
     </main>
 
     <Footer title={siteTitle} />
+
+    <!-- Page Top Floating Button -->
+    <button
+      id="pageTopBtn"
+      type="button"
+      aria-label="ページ上部へ戻る"
+      class="fixed bottom-6 z-50 hidden opacity-0 transition-opacity duration-200
+             focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+    >
+      <img src="/assets/images/pageTop.png" alt="" class="block w-12 h-auto select-none" />
+    </button>
+
+    <script is:inline>
+      (() => {
+        const btn = document.getElementById("pageTopBtn");
+        const main = document.querySelector("main");
+        if (!btn || !main) return;
+
+        const SHOW_AT = 1;
+
+        const place = () => {
+          const rect = main.getBoundingClientRect();
+          const btnW = btn.offsetWidth || 48;
+          const gap = 16;
+
+          let left = rect.right + gap;
+          const maxLeft = window.innerWidth - btnW - gap;
+          left = Math.min(left, maxLeft);
+          left = Math.max(gap, left);
+
+          btn.style.left = `${left}px`;
+          btn.style.right = "auto";
+        };
+
+        const show = () => {
+          btn.classList.remove("hidden");
+          place();
+          requestAnimationFrame(() => btn.classList.remove("opacity-0"));
+        };
+
+        const hide = () => {
+          btn.classList.add("opacity-0");
+          setTimeout(() => btn.classList.add("hidden"), 200);
+        };
+
+        const onScroll = () => {
+          const y = window.scrollY || document.documentElement.scrollTop || 0;
+          y >= SHOW_AT ? show() : hide();
+        };
+
+        btn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+        window.addEventListener("resize", place, { passive: true });
+
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+      })();
+    </script>
   </body>
 </html>

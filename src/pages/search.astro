@@ -8,121 +8,136 @@ const q = Astro.url.searchParams.get("q") ?? "";
 
 // ✅ ビルド時に記事一覧を取り込んでおく（staticでも動く）
 const { contents } = await getBlogList({ limit: 100 });
-const items = contents.map((p) => ({
-  id: p.id,
-  title: p.title ?? "",
-  description: p.description ?? "",
-}));
+const items = contents.map((p) => {
+  const raw = p.category;
+
+  const pickName = (v) =>
+    typeof v === "string"
+      ? v
+      : v && typeof v === "object"
+        ? (v.name ?? v.title ?? v.id ?? "")
+        : "";
+
+  const category = Array.isArray(raw)
+    ? raw.map(pickName).filter(Boolean).join(" / ")
+    : pickName(raw);
+
+  return {
+    id: p.id,
+    title: p.title ?? "",
+    description: p.description ?? "",
+    category,
+  };
+});
+
 
 const Meta = { title: q ? `検索: ${q}` : "検索" };
 ---
 
 <Layout Meta={Meta}>
-<div slot="main" class="space-y-6">
-  <!-- タイトル左 / 検索フォーム右 -->
-  <section class="rounded-2xl bg-gray-50 p-6 md:p-8">
-    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight">検索結果</h1>
-        <p id="summary" class="mt-2 text-sm text-gray-600"></p>
+  <div slot="main" class="space-y-6" data-search-page>
+    <!-- ✅ グレー背景やめて、見出しに検索文言を出す -->
+    <section class="pt-2">
+      <h1 id="search-heading" class="text-2xl font-semibold tracking-tight"></h1>
+      <p id="search-summary" class="mt-2 text-sm text-gray-600"></p>
+    </section>
+
+    <!-- 結果一覧：お知らせ一覧に寄せる（枠 + 罫線区切り / 件数は外） -->
+    <section class="space-y-3">
+      <div class="rounded-2xl border bg-white overflow-hidden">
+        <div id="search-result" class="divide-y divide-gray-200"></div>
       </div>
 
-<form
-  method="get"
-  action="/search"
-  class="flex items-stretch overflow-hidden rounded-full border border-gray-300 bg-white"
->
-  <input
-    name="q"
-    type="search"
-    value={q}
-    placeholder="キーワードで検索（例：CSV、初期設定）"
-    class="w-[360px] max-w-[60vw] px-6 py-3 text-sm outline-none"
-  />
+      <!-- 件数は“枠の外”に -->
+      <div class="text-sm text-gray-500">
+        <span id="search-count"></span>
+      </div>
+    </section>
 
-  <button
-    type="submit"
-    class="bg-black px-6 py-3 text-sm font-medium text-white"
-  >
-    検索
-  </button>
-</form>
+    <script define:vars={{ ITEMS: items, INITIAL_Q: q }}>
+      const params = new URLSearchParams(location.search);
+      const qRaw = (params.get("q") || INITIAL_Q || "").trim();
+      const q = qRaw.toLowerCase();
 
-    </div>
-  </section>
+      const headingEl = document.getElementById("search-heading");
+      const summaryEl = document.getElementById("search-summary");
+      const resultEl = document.getElementById("search-result");
+      const countEl = document.getElementById("search-count");
 
-  <!-- 結果一覧：お知らせ一覧のカード風 -->
-  <section class="rounded-2xl border bg-white p-6">
-    <div id="result" class="divide-y"></div>
-    <div class="mt-4 text-sm text-gray-500">
-      <span id="count"></span>
-    </div>
-  </section>
+      if (!headingEl || !resultEl || !summaryEl || !countEl) return;
 
-  <script define:vars={{ ITEMS: items, INITIAL_Q: q }}>
-    const params = new URLSearchParams(location.search);
-    const q = (params.get("q") || INITIAL_Q || "").trim().toLowerCase();
+      const escapeHtml = (s) =>
+        String(s)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
 
-    const resultEl = document.getElementById("result");
-    const summaryEl = document.getElementById("summary");
-    const countEl = document.getElementById("count");
-
-    if (!resultEl || !summaryEl || !countEl) return;
-
-    const escapeHtml = (s) =>
-      String(s)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-
-    if (!q) {
-      summaryEl.textContent = "キーワードを入力して検索してください";
-      resultEl.innerHTML = `<div class="py-3 text-sm text-gray-600">キーワードを入力してください。</div>`;
-      countEl.textContent = "";
-    } else {
-      const hits = ITEMS.filter((x) => {
-        const t = (x.title || "").toLowerCase();
-        const d = (x.description || "").toLowerCase();
-        return t.includes(q) || d.includes(q);
-      });
-
-      summaryEl.innerHTML = `「<b>${escapeHtml(q)}</b>」の検索結果：${hits.length}件`;
-
-      if (!hits.length) {
-        resultEl.innerHTML = `<div class="py-3 text-sm text-gray-600">一致する記事がありません。</div>`;
+      if (!q) {
+        headingEl.textContent = "キーワードを入力して検索してください";
+        resultEl.innerHTML = `<div class="px-6 py-5 text-sm text-gray-600"></div>`;
         countEl.textContent = "";
       } else {
-        const show = hits.slice(0, 50);
+        const hits = ITEMS.filter((x) => {
+          const t = (x.title || "").toLowerCase();
+          const d = (x.description || "").toLowerCase();
+          return t.includes(q) || d.includes(q);
+        });
 
-        resultEl.innerHTML = show.map((item) => {
-          const desc = (item.description || "");
-          const short = desc.slice(0, 80);
-          const more = desc.length > 80 ? "…" : "";
+        // ✅ 見出しに「『◎◎』の検索結果：◆件」
+        headingEl.textContent = `「${qRaw}」の検索結果：${hits.length}件`;
+        summaryEl.textContent = "";
 
-          return `
-            <a class="block py-3 hover:bg-gray-50 rounded-lg px-2 -mx-2"
-               href="/docs/${encodeURIComponent(item.id)}/">
-              <div class="text-sm font-medium text-gray-900">
-                ${escapeHtml(item.title || "（無題）")}
-              </div>
-              ${
-                short
-                  ? `<div class="mt-1 text-xs text-gray-600">${escapeHtml(short)}${more}</div>`
-                  : ""
-              }
-            </a>
-          `;
-        }).join("");
+        if (!hits.length) {
+          resultEl.innerHTML = `<div class="px-6 py-5 text-sm text-gray-600">一致する記事がありません。</div>`;
+          countEl.textContent = "";
+        } else {
+          const show = hits.slice(0, 50);
 
-        countEl.textContent =
-          show.length < hits.length
-            ? `表示：${show.length}件 / 全${hits.length}件`
-            : `全${hits.length}件`;
+          resultEl.innerHTML = show
+            .map((item) => {
+              const desc = item.description || "";
+              const short = desc.slice(0, 120);
+              const more = desc.length > 120 ? "…" : "";
+
+              // ✅ カテゴリは「タイトル右：タイトル + 余白 + チップ」
+              const chip = item.category
+                ? `<span class="shrink-0 rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-900">
+                     ${escapeHtml(item.category)}
+                   </span>`
+                : "";
+
+              return `
+                <a class="block px-6 py-5 hover:bg-gray-50 transition"
+                   href="/docs/${encodeURIComponent(item.id)}/">
+                  <div class="space-y-2">
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <div class="text-lg font-semibold text-gray-900 leading-snug">
+                        ${escapeHtml(item.title || "（無題）")}
+                      </div>
+                      ${chip}
+                    </div>
+
+                    ${
+                      short
+                        ? `<div class="text-sm text-gray-600 leading-relaxed">
+                             ${escapeHtml(short)}${more}
+                           </div>`
+                        : ""
+                    }
+                  </div>
+                </a>
+              `;
+            })
+            .join("");
+
+          countEl.textContent =
+            show.length < hits.length
+              ? `表示：${show.length}件 / 全${hits.length}件`
+              : `全${hits.length}件`;
+        }
       }
-    }
-  </script>
-</div>
-
+    </script>
+  </div>
 </Layout>

@@ -12,23 +12,21 @@ import {
   tocExtractor,
 } from "microcms-rich-editor-handler";
 
+import { calloutTransformer } from "@libs/calloutTransformer.ts";
+
+
 /**
  * ✅ 静的サイト（output: "static"）では必須
- * /blog/[id] を生成するための全ID一覧を返す
+ * /docs/[id] を生成するための全ID一覧を返す
  */
 export async function getStaticPaths() {
-  // まずは最大100件取得（件数が増えたら後でページング対応）
   const data = await getBlogList({ limit: 100 });
-
   return data.contents.map((item) => ({
     params: { id: item.id },
   }));
 }
 
-// ✅ 動的ルートのパラメータ（ここで id が定義される）
 const { id } = Astro.params;
-
-// ✅ 記事詳細・カテゴリ取得
 const blog = await getBlogDetail(id);
 
 // ✅ 本文HTML化 + TOC抽出
@@ -38,6 +36,7 @@ let toc: TocItem[] = [];
 if (blog?.content) {
   const { html: transformedHtml, data } = await microCMSRichEditorHandler(blog.content, {
     transformers: [
+      calloutTransformer,
       responsiveImageTransformer(),
       codeBlockFileNameTransformer({ attributes: { class: "fileName" } }),
       syntaxHighlightingByShikiTransformer({
@@ -59,16 +58,39 @@ const Meta = {
   ogType: "article",
   description: blog?.description ?? "",
 };
+
+// ✅ サブナビ（共通）
+const subnavItems = [
+  { label: "スタートガイド", href: "/start/" },
+  { label: "コマンド一覧", href: "/commands/" },
+  { label: "コンソール", href: "/console/" },
+  { label: "開発事例", href: "/cases/" },
+  { label: "トラブルシューティング", href: "/troubleshooting/" },
+];
+
+// ✅ category名 → サブナビ現在地（activeHref）にマッピング
+const categoryName = blog?.category?.[0]?.name ?? "";
+
+// ざっくりでも壊れないように「含む」で判定（microCMS側の表記ゆれ対策）
+const activeHref =
+  categoryName.includes("スタート") ? "/start/" :
+  categoryName.includes("コマンド") ? "/commands/" :
+  categoryName.includes("コンソール") ? "/console/" :
+  categoryName.includes("開発") ? "/cases/" :
+  categoryName.includes("トラブル") ? "/troubleshooting/" :
+  "/commands/"; // 迷ったらコマンド扱い
 ---
 
-<Layout Meta={Meta}>
+<Layout
+  Meta={Meta}
+  subnav={{ items: subnavItems, currentPath: Astro.url.pathname, activeHref }}
+>
+
   <div slot="main" class="space-y-8">
     {blog ? <BlogPost blog={blog} /> : <p>記事が見つかりません</p>}
   </div>
 
-<div slot="sidebar" class="space-y-8 md:self-start">
-  <TOC toc={toc} title="目次" sticky={true} />
-</div>
+  <div slot="sidebar" class="space-y-8 md:self-start">
+    <TOC toc={toc} title="目次" sticky={true} />
+  </div>
 </Layout>
-
-

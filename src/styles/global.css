@@ -111,3 +111,93 @@ html {
 .entry-content pre code {
   @apply bg-transparent text-inherit p-0;
 }
+
+
+/* Callout base */
+.callout{
+  position: relative;
+  border-radius: 6px;
+  padding: 14px 16px 16px;    /* 少しコンパクトに */
+  margin: 20px 0;             /* 上下の間隔を少し広げる */
+  border: 1px solid rgba(0,0,0,.08);
+  font-size: 0.85em !important;
+  line-height: 1.7;
+
+  /* 本文より少し内側に寄せて「一回り小さく」見せる */
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+/* 枠内の最後の要素の余白を消す */
+.callout > :last-child{
+  margin-bottom: 0;
+}
+
+/* Tips */
+.callout.tips{
+  background: #e6f6ff;
+  border-color: rgba(11,74,162,.18);
+}
+.callout.tips::before{
+  content: "Tips";
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 800;
+  font-size: 1.3em !important;
+  color: #0b4aa2;
+}
+
+/* Caution */
+.callout.caution{
+  background: #fff1e6;
+  border-color: rgba(180,35,24,.20);
+}
+.callout.caution::before{
+  content: "注意";
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 800;
+  font-size: 13px;
+  color: #b42318;
+}
+
+/* コマンド名（リンク想定） */
+.command_name{
+  display: inline-flex;           /* ←高さブレ防止 */
+  align-items: center;            /* ←矢印と文字の縦位置を揃える */
+  gap: 6px;                       /* ←矢印と文字の余白 */
+  padding: 2px 8px 3px; /* 上 左右 下 */
+  margin: 0 6px;
+  border-radius: 2px;
+  background: #f3f4f6;
+  border: 1px solid rgba(0,0,0,.14);
+  font-size: .9em;
+  font-weight: 600;
+  line-height: 1.4;               /* ←箱の高さを安定させる */
+  white-space: nowrap;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 1px 1px 3px rgba(0,0,0,.08);
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
+}
+
+/* 先頭矢印（大きく見せても箱が膨らみにくい） */
+.command_name::before{
+  content: "›";
+  font-size: 1.15em;              /* ←大きめだけど暴れない */
+  font-weight: 700;
+  opacity: .65;
+  line-height: 1;                 /* ←疑似要素の高さを抑える */
+}
+
+/* 押せそう感（リンク前提） */
+.command_name:hover{
+  background: #e9ecef;
+  box-shadow: 2px 2px 6px rgba(0,0,0,.10);
+  transform: translateY(1px);
+}
+
+.command_name:active{
+  transform: translateY(0);
+  box-shadow: 1px 1px 3px rgba(0,0,0,.08);
+}

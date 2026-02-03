@@ -1,7 +1,7 @@
 ---
 // src/components/BlogPost.astro
 import Date from "@components/Date.astro";
-import type { Category } from "@libs/microcms";
+import type { Category, CommandGroup } from "@libs/microcms";
 
 const { blog } = Astro.props;
 ---
@@ -14,18 +14,32 @@ const { blog } = Astro.props;
   </p>
 
   <div class="flex flex-wrap gap-2 mb-8">
+    {/* カテゴリ */}
     {
       blog.category?.length > 0 ? (
         blog.category.map((cat: Category) => (
-          <a
-            href={`/category/${cat.id}`}
-            class="category bg-gray-600 text-white px-3 py-1 rounded-full text-xs hover:bg-gray-700 transition"
-          >
-            {cat.name}
-          </a>
+          <span
+          class="bg-gray-600 text-white px-3 py-1 rounded-full text-xs"
+        >
+          {cat.name}
+        </span>
         ))
       ) : (
         <span class="text-gray-400 text-xs">No Category</span>
+      )
+    }
+
+    {/* コマンドグループ（comgr） */}
+    {
+      blog.comgr?.length > 0 && (
+        blog.comgr.map((g: CommandGroup) => (
+          <span
+            class="bg-sky-100 text-sky-900 px-3 py-1 rounded-full text-xs border border-sky-200"
+            title={g.slug}
+          >
+            {g.name}
+          </span>
+        ))
       )
     }
   </div>
