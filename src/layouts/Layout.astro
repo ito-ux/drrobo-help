@@ -71,6 +71,7 @@ const CLARITY_ID = import.meta.env.PUBLIC_CLARITY_ID;
     <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={url} />
     <meta property="og:type" content={ogType} />
+<meta name="debug-env" content={`GA:${import.meta.env.PUBLIC_GA_ID ?? "none"} / CL:${import.meta.env.PUBLIC_CLARITY_ID ?? "none"}`} />
 
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:image" content={ogImage} />
