@@ -23,7 +23,6 @@
     "shiki": "^1.29.2"
   },
   "devDependencies": {
-    "@astrojs/cloudflare": "^12.6.12",
     "prettier": "^3.5.3",
     "prettier-plugin-astro": "^0.14.1"
   }
