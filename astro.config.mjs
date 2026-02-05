@@ -3,6 +3,6 @@ import tailwind from "@astrojs/tailwind";
 
 export default defineConfig({
   output: 'static',
-  site: "https://help.drrobo.jp/",
+  site: "https://help.drrobo.ai/",
   integrations: [tailwind()],
 });

@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================
+   Base
+========================================================= */
 body {
   @apply font-body;
   text-underline-offset: 0.3em;
@@ -11,6 +14,11 @@ html {
   scrollbar-gutter: stable;
   overflow-y: scroll;
 }
+
+/* =========================================================
+   Entry Content (microCMS rich editor output)
+   ※本文は .entry-content に限定（TOCや他ページ巻き込まない）
+========================================================= */
 
 /* 段落 */
 .entry-content p {
@@ -31,27 +39,6 @@ html {
 
 .entry-content figure figcaption {
   @apply leading-relaxed text-sm text-black/50 italic pt-1;
-}
-
-/* 見出し（h1〜h5） */
-.entry-content h1 {
-  @apply text-3xl font-bold mt-8 mb-4 pt-2 text-gray-900;
-}
-
-.entry-content h2 {
-  @apply text-2xl font-semibold mt-6 mb-3 pt-2 text-gray-800;
-}
-
-.entry-content h3 {
-  @apply text-xl font-medium mt-5 mb-2 pt-2 text-gray-700;
-}
-
-.entry-content h4 {
-  @apply text-lg font-semibold mt-4 mb-2 pt-2 text-gray-700;
-}
-
-.entry-content h5 {
-  @apply text-base font-medium mt-3 mb-2 pt-2 text-gray-600;
 }
 
 /* 区切り線（hr） */
@@ -112,33 +99,38 @@ html {
   @apply bg-transparent text-inherit p-0;
 }
 
+/* 本文サイズ：気持ちだけ小さめ */
+.entry-content {
+  font-size: 0.94rem;
+}
 
-/* Callout base */
-.callout{
+/* =========================================================
+   Callout
+========================================================= */
+.callout {
   position: relative;
   border-radius: 6px;
-  padding: 14px 16px 16px;    /* 少しコンパクトに */
-  margin: 20px 0;             /* 上下の間隔を少し広げる */
-  border: 1px solid rgba(0,0,0,.08);
+  padding: 14px 16px 16px;
+  margin: 20px 0;
+  border: 1px solid rgba(0, 0, 0, .08);
   font-size: 0.85em !important;
   line-height: 1.7;
 
-  /* 本文より少し内側に寄せて「一回り小さく」見せる */
   margin-left: 8px;
   margin-right: 8px;
 }
 
 /* 枠内の最後の要素の余白を消す */
-.callout > :last-child{
+.callout > :last-child {
   margin-bottom: 0;
 }
 
 /* Tips */
-.callout.tips{
+.callout.tips {
   background: #e6f6ff;
-  border-color: rgba(11,74,162,.18);
+  border-color: rgba(11, 74, 162, .18);
 }
-.callout.tips::before{
+.callout.tips::before {
   content: "Tips";
   display: block;
   margin-bottom: 8px;
@@ -148,11 +140,11 @@ html {
 }
 
 /* Caution */
-.callout.caution{
+.callout.caution {
   background: #fff1e6;
-  border-color: rgba(180,35,24,.20);
+  border-color: rgba(180, 35, 24, .20);
 }
-.callout.caution::before{
+.callout.caution::before {
   content: "注意";
   display: block;
   margin-bottom: 8px;
@@ -161,64 +153,70 @@ html {
   color: #b42318;
 }
 
-/* コマンド名（リンク想定） */
-.command_name{
-  display: inline-flex;           /* ←高さブレ防止 */
-  align-items: center;            /* ←矢印と文字の縦位置を揃える */
-  gap: 6px;                       /* ←矢印と文字の余白 */
-  padding: 2px 8px 3px; /* 上 左右 下 */
+/* =========================================================
+   Command Name Badge (inline)
+========================================================= */
+.command_name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px 3px;
   margin: 0 6px;
   border-radius: 2px;
   background: #f3f4f6;
-  border: 1px solid rgba(0,0,0,.14);
+  border: 1px solid rgba(0, 0, 0, .14);
   font-size: .9em;
   font-weight: 600;
-  line-height: 1.4;               /* ←箱の高さを安定させる */
+  line-height: 1.4;
   white-space: nowrap;
   text-decoration: none;
   color: inherit;
-  box-shadow: 1px 1px 3px rgba(0,0,0,.08);
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, .08);
   transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
 }
 
-/* 先頭矢印（大きく見せても箱が膨らみにくい） */
-.command_name::before{
+.command_name::before {
   content: "›";
-  font-size: 1.15em;              /* ←大きめだけど暴れない */
+  font-size: 1.15em;
   font-weight: 700;
   opacity: .65;
-  line-height: 1;                 /* ←疑似要素の高さを抑える */
+  line-height: 1;
 }
 
-/* 押せそう感（リンク前提） */
-.command_name:hover{
+.command_name:hover {
   background: #e9ecef;
-  box-shadow: 2px 2px 6px rgba(0,0,0,.10);
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, .10);
   transform: translateY(1px);
 }
 
-.command_name:active{
+.command_name:active {
   transform: translateY(0);
-  box-shadow: 1px 1px 3px rgba(0,0,0,.08);
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, .08);
 }
 
-/* 記事本文の画像を制御 */
-.prose img {
-  max-width: 600px;
-  width: 100%;
+/* =========================================================
+   Images (entry-content only)
+   ※重複してた .prose img と .entry-content img は一本化
+========================================================= */
+.entry-content img {
+  width: auto;
+  max-width: min(600px, 100%);
   height: auto;
-
-  margin: 1.5rem auto;
   display: block;
-
+  margin: 16px auto;
   cursor: zoom-in;
-  border-radius: 6px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+  background: #fff;
 }
 
+/* Overlay */
 .img-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.75); /* 少し青みのある黒 */
+  background: rgba(15, 23, 42, 0.75);
   z-index: 1000;
 
   display: flex;
@@ -231,46 +229,38 @@ html {
   max-width: 90vw;
   max-height: 90vh;
   border-radius: 8px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
-/* 記事内画像：表示は控えめ、クリックで拡大 */
-.entry-content img{
-  width: auto;
-  max-width: min(600px, 100%);
-  height: auto;
+/* =========================================================
+   Article Page Headings (docs/news ONLY)
+   scope: body.is-article-page .doc-article ...
+   ※TOCは .doc-article 外なので影響しない
+========================================================= */
+
+/* （重要）microCMS本文のh1は基本出ないので触らない
+   記事タイトルh1（BlogPost側の手書き）だけ装飾 */
+.is-article-page .doc-article header h1 {
+  font-size: 2.3rem;
+  line-height: 1.3;
+  margin: 0 0 0.6rem;
+  color: #0f172a;
+  position: relative;
+}
+
+/* タイトル下線（概要と同じ濃さ・少し丸め） */
+.is-article-page .doc-article header h1::after {
+  content: "";
   display: block;
-  margin: 16px auto;
-  cursor: zoom-in;
-
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.14);
-  box-shadow: 0 2px 6px rgba(0,0,0,.08);
-  background: #fff;
+  height: 1px;
+  width: 100%;
+  margin-top: 0.7rem;
+  background: #dedede;
+  border-radius: 9999px;
 }
 
-
-/* 画像が中央寄せの方が見栄え良ければ */
-.entry-content img {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* 本文サイズ：気持ちだけ小さめ */
-.entry-content{
-  font-size: 0.94rem;
-}
-
-/* 見出しの装飾 */
-h1 {
-  font-size: 2.3rem !important;
-  font-weight: 700;
-  line-height: 1.4;
-  margin: 0 0 1.5rem;
-  color: #0f172a; /* sky-950 */
-}
-
-.entry-content h2 {
+/* 本文見出し（H2/H3）は entry-content 内だけ */
+.is-article-page .doc-article .entry-content h2 {
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -281,47 +271,71 @@ h1 {
   color: #0f172a;
 }
 
-.entry-content h2::before {
+.is-article-page .doc-article .entry-content h2::before {
   content: "";
   width: 6px;
-  height: 1.4em;
-  background: #f97316; /* orange-500 */
-  border-radius: 2px;
+  height: 1.15em;           /* 高さズレしにくい値 */
+  background: #f97316;
+  border-radius: 9999px;    /* “丸め”統一 */
 }
 
-
-
-/* 記事本文のh3だけ */
-.entry-content h3{
+/* H3：グレー下地＋オレンジ線（あなたの“いけてる下線”を復活） */
+.is-article-page .doc-article .entry-content h3 {
   position: relative;
   padding-bottom: 12px;
   margin: 28px 0 18px;
   font-size: 1.05rem;
   font-weight: 600;
+  color: #1e293b;
 }
 
 /* グレー線（下地） */
-.entry-content h3::after{
-  content:"";
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  height:1px;
-  background:#cdcecf;
+.is-article-page .doc-article .entry-content h3::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: #cdcecf;
   z-index: 1;
 }
 
 /* オレンジ線（上に重ねる） */
-.entry-content h3::before{
-  content:"";
-  position:absolute;
-  left:0;
-  bottom:0;
-  height:3px;           /* ← 太さ：ここを 6px とかにしてもOK */
-  width:180px;
-  background:#f97316;
-  z-index: 2;           /* ← グレーより前面 */
-  border-radius: 2px;   /* 角を少し丸める（任意） */
+.is-article-page .doc-article .entry-content h3::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 180px;
+  background: #f97316;
+  z-index: 2;
+  border-radius: 9999px;
 }
 
+/* 記事本文の h4：濃いグレー＋太字 */
+.entry-content h4 {
+  font-size: 0.95rem;      /* h3 より一段下 */
+  font-weight: 700;        /* 太字 */
+  color: #374151;          /* gray-700 */
+  margin: 1.5rem 0 0.75rem;
+}
+
+
+/* 記事本文だけ左インデント（表・リスト・コード含め全部） */
+.is-article-page .doc-article .entry-content {
+  padding-left: 0.75rem !important;
+  margin-bottom: 1rem;
+  line-height: 1.55;
+  font-size: 0.95rem;
+  
+}
+
+.entry-content ul {
+    margin-left: 0.5rem;
+}
+
+.entry-content li {
+    margin-bottom: 0.1rem;
+}
