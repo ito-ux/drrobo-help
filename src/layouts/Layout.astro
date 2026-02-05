@@ -42,6 +42,9 @@ const hasSidebar = Astro.slots.has("sidebar");
 const mainClass = hasSidebar
   ? `flex-1 mx-auto w-full max-w-6xl px-4 md:px-6 ${mainPaddingY} grid grid-cols-1 md:grid-cols-[3fr_1fr] gap-8`
   : `flex-1 mx-auto w-full max-w-6xl px-4 md:px-6 ${mainPaddingY}`;
+
+const GA_ID = import.meta.env.PUBLIC_GA_ID;
+const CLARITY_ID = import.meta.env.PUBLIC_CLARITY_ID;
 ---
 
 <!doctype html>
@@ -73,6 +76,28 @@ const mainClass = hasSidebar
     <meta property="twitter:image" content={ogImage} />
 
     <link rel="canonical" href={url} />
+    {GA_ID && (
+  <>
+    <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
+    <script is:inline define:vars={{ GA_ID }}>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag("js", new Date());
+      gtag("config", GA_ID);
+    </script>
+  </>
+)}
+
+{CLARITY_ID && (
+  <script is:inline define:vars={{ CLARITY_ID }}>
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", CLARITY_ID);
+  </script>
+)}
+
   </head>
 
   <body class="min-h-screen flex flex-col overflow-x-clip">
