@@ -42,73 +42,38 @@ const hasSidebar = Astro.slots.has("sidebar");
 const mainClass = hasSidebar
   ? `flex-1 mx-auto w-full max-w-6xl px-4 md:px-6 ${mainPaddingY} grid grid-cols-1 md:grid-cols-[3fr_1fr] gap-8`
   : `flex-1 mx-auto w-full max-w-6xl px-4 md:px-6 ${mainPaddingY}`;
-
-const GA_ID = import.meta.env.PUBLIC_GA_ID;
-const CLARITY_ID = import.meta.env.PUBLIC_CLARITY_ID;
 ---
 
 <!doctype html>
 <html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <meta name="generator" content={Astro.generator} />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
 
-  <title>{pageTitle}</title>
-  <meta name="description" content={pageDescription} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap"
-    rel="stylesheet"
-  />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
 
-  <meta property="og:site_name" content={siteTitle} />
-  <meta property="og:title" content={pageTitle} />
-  <meta property="og:image" content={ogImage} />
-  <meta property="og:description" content={pageDescription} />
-  <meta property="og:url" content={url} />
-  <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={siteTitle} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={url} />
+    <meta property="og:type" content={ogType} />
 
-  <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:image" content={ogImage} />
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:image" content={ogImage} />
 
-  <link rel="canonical" href={url} />
-
-  {/* =========================
-      Analytics (GA4 / Clarity)
-      ========================= */}
-
-  {/* GA4 */}
-  {import.meta.env.PUBLIC_GA_ID && (
-    <>
-      <script
-        async
-        src={`https://www.googletagmanager.com/gtag/js?id=${import.meta.env.PUBLIC_GA_ID}`}
-      ></script>
-      <script is:inline define:vars={{ GA_ID: import.meta.env.PUBLIC_GA_ID }}>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', GA_ID);
-      </script>
-    </>
-  )}
-
-  {/* Microsoft Clarity */}
-  {import.meta.env.PUBLIC_CLARITY_ID && (
-    <script is:inline define:vars={{ CLARITY_ID: import.meta.env.PUBLIC_CLARITY_ID }}>
-      (function(c,l,a,r,i,t,y){
-          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", CLARITY_ID);
-    </script>
-  )}
-</head>
-
+    <link rel="canonical" href={url} />
+  </head>
 
   <body class="min-h-screen flex flex-col overflow-x-clip">
     <!-- ✅ トップ以外でヘッダー検索を表示 -->
