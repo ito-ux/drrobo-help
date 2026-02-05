@@ -201,3 +201,127 @@ html {
   transform: translateY(0);
   box-shadow: 1px 1px 3px rgba(0,0,0,.08);
 }
+
+/* 記事本文の画像を制御 */
+.prose img {
+  max-width: 600px;
+  width: 100%;
+  height: auto;
+
+  margin: 1.5rem auto;
+  display: block;
+
+  cursor: zoom-in;
+  border-radius: 6px;
+}
+
+.img-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75); /* 少し青みのある黒 */
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+
+.img-overlay img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 8px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+/* 記事内画像：表示は控えめ、クリックで拡大 */
+.entry-content img{
+  width: auto;
+  max-width: min(600px, 100%);
+  height: auto;
+  display: block;
+  margin: 16px auto;
+  cursor: zoom-in;
+
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  box-shadow: 0 2px 6px rgba(0,0,0,.08);
+  background: #fff;
+}
+
+
+/* 画像が中央寄せの方が見栄え良ければ */
+.entry-content img {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 本文サイズ：気持ちだけ小さめ */
+.entry-content{
+  font-size: 0.94rem;
+}
+
+/* 見出しの装飾 */
+h1 {
+  font-size: 2.3rem !important;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0 0 1.5rem;
+  color: #0f172a; /* sky-950 */
+}
+
+.entry-content h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 3rem 0 1.2rem;
+  color: #0f172a;
+}
+
+.entry-content h2::before {
+  content: "";
+  width: 6px;
+  height: 1.4em;
+  background: #f97316; /* orange-500 */
+  border-radius: 2px;
+}
+
+
+
+/* 記事本文のh3だけ */
+.entry-content h3{
+  position: relative;
+  padding-bottom: 12px;
+  margin: 28px 0 18px;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+/* グレー線（下地） */
+.entry-content h3::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:1px;
+  background:#cdcecf;
+  z-index: 1;
+}
+
+/* オレンジ線（上に重ねる） */
+.entry-content h3::before{
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:0;
+  height:3px;           /* ← 太さ：ここを 6px とかにしてもOK */
+  width:180px;
+  background:#f97316;
+  z-index: 2;           /* ← グレーより前面 */
+  border-radius: 2px;   /* 角を少し丸める（任意） */
+}
+

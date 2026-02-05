@@ -1,14 +1,14 @@
 ---
 // src/components/Date.astro
 import dayjs from "dayjs";
+import "dayjs/locale/ja";
 
-interface Props {
-  date: string;
-}
-
+type Props = { date: string | Date };
 const { date } = Astro.props as Props;
+
+dayjs.locale("ja");
 ---
 
 <time class="text-sm text-gray-500 italic">
-  {dayjs(date).format("MMMM D, YYYY")}
+  {dayjs(date).format("YYYY年M月D日")}
 </time>

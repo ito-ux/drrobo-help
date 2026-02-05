@@ -73,6 +73,15 @@ const mainClass = hasSidebar
     <meta property="twitter:image" content={ogImage} />
 
     <link rel="canonical" href={url} />
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-F7M17WER1T"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-F7M17WER1T');
+</script>
   </head>
 
   <body class="min-h-screen flex flex-col overflow-x-clip">
@@ -168,5 +177,87 @@ const mainClass = hasSidebar
         window.addEventListener("scroll", onScroll, { passive: true });
       })();
     </script>
+
+  <!-- 画像ライトボックス（全ページ共通で1つだけ） -->
+<div id="imgLightbox" class="imglb" aria-hidden="true">
+  <button type="button" class="imglb__backdrop" aria-label="閉じる"></button>
+  <img class="imglb__img" alt="" />
+</div>
+
+<style is:global>
+  .imglb{
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 24px;
+  }
+  .imglb.is-open{ display: flex; }
+
+  .imglb__backdrop{
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    border: 0;
+  }
+  .imglb__img{
+    position: relative;
+    max-width: min(900px, 86vw);
+    max-height: 80vh;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    cursor: zoom-out;
+  }
+</style>
+<script is:inline>
+  (() => {
+    const box = document.getElementById("imgLightbox");
+    if (!box) return;
+
+    const imgEl = box.querySelector(".imglb__img");
+    const backdrop = box.querySelector(".imglb__backdrop");
+    if (!imgEl || !backdrop) return;
+
+    const open = (src, alt) => {
+      imgEl.src = src;
+      imgEl.alt = alt || "";
+      box.classList.add("is-open");
+      box.setAttribute("aria-hidden", "false");
+      document.documentElement.style.overflow = "hidden";
+    };
+
+    const close = () => {
+      box.classList.remove("is-open");
+      box.setAttribute("aria-hidden", "true");
+      imgEl.src = "";
+      document.documentElement.style.overflow = "";
+    };
+
+    // 記事HTMLは set:html なので「クリックは委譲」で拾う
+    document.addEventListener("click", (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLImageElement)) return;
+
+      // 記事本文（entry-content）内の画像だけ対象にする
+      if (!target.closest(".entry-content")) return;
+
+      // 画像リンク（aタグで囲われてる）場合は、遷移させずライトボックス優先
+      e.preventDefault();
+
+      open(target.currentSrc || target.src, target.alt);
+    });
+
+    backdrop.addEventListener("click", close);
+    imgEl.addEventListener("click", close);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") close();
+    });
+  })();
+</script>
+
   </body>
 </html>

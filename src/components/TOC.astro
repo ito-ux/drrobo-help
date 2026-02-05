@@ -18,7 +18,10 @@ const levelClassMap: Record<number, string> = {
   <div class={sticky ? "sticky top-24" : ""}>
     {/* Cloudflare寄せ：カード感を消して罫線のみ */}
     <nav aria-label="On this page" class="border-l border-gray-200 pl-4">
-      <h2 class="text-sm font-semibold text-gray-600 mb-3">{title}</h2>
+<h2 class="text-sm font-semibold mb-3 flex items-center gap-1">
+  <span class="text-orange-500/80">{title}</span>
+</h2>
+
 
       {/* 目次が長いときだけ、この中がスクロール */}
       <div class="max-h-[calc(100vh-6rem)] overflow-auto pr-2">
