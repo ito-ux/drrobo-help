@@ -1,0 +1,92 @@
+---
+import Layout from "@layouts/Layout.astro";
+import BlogPost from "@components/BlogPost.astro";
+import { getBlogDetail, getStartGuideList } from "@libs/microcms";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const START_CATEGORY_ID = "b0u529c8-p";
+
+  const { contents } = await getStartGuideList(START_CATEGORY_ID, { limit: 100 });
+  return (contents ?? []).map((item) => ({
+    params: { slug: item.id }, // ← docsのcontentId（例：step1）
+  }));
+}
+
+const START_CATEGORY_ID = "b0u529c8-p"; // 左ナビ生成に使う（これはトップレベルでもOK）
+
+const { slug } = Astro.params;
+const blog = await getBlogDetail(slug);
+
+const { contents: startPostsRaw } = await getStartGuideList(START_CATEGORY_ID, { limit: 100 });
+const startPosts = (startPostsRaw ?? []).map((p) => ({
+  id: p.id,
+  title: p.title,
+}));
+
+const subnavItems = [
+  { label: "スタートガイド", href: "/start/" },
+  { label: "コマンド一覧", href: "/commands/" },
+  { label: "コンソール", href: "/console/" },
+  { label: "開発事例", href: "/cases/" },
+  { label: "トラブルシューティング", href: "/troubleshooting/" },
+];
+---
+
+<Layout
+  Meta={{
+    title: blog?.title ?? "スタートガイド",
+    description: blog?.description ?? "",
+    ogType: "article",
+  }}
+  mainPaddingY="pt-0 pb-0"
+  subnav={{ items: subnavItems, currentPath: Astro.url.pathname, activeHref: "/start/" }}
+>
+  <div slot="topbar">
+    <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-white border-b border-gray-200 shadow-[0_2px_6px_rgba(15,23,42,0.06)]">
+      <div class="mx-auto w-full max-w-6xl px-4 md:px-6 pt-6 pb-6">
+        <h1 class="text-2xl md:text-3xl font-semibold text-sky-950">スタートガイド</h1>
+        <p class="mt-2 text-sm md:text-base text-sky-950/70">
+          Dr.Roboをはじめて利用する方向けの情報をまとめています。
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <div slot="main">
+    <section class="grid grid-cols-1 md:grid-cols-[232px_1fr] gap-6">
+      <!-- 左：記事一覧 -->
+      <aside class="md:pr-8">
+        <div class="pt-6">
+          <div class="text-sm font-semibold text-gray-900 mb-3">記事一覧</div>
+          <nav class="space-y-1">
+            {startPosts.map((p) => {
+              const href = `/start/${p.id}/`;
+              const isActive = Astro.url.pathname === href;
+              return (
+                <a
+                  href={href}
+                  class:list={[
+                    "block rounded-md px-3 py-2 text-sm transition",
+                    isActive ? "bg-gray-100 text-gray-900 font-semibold" : "text-gray-700 hover:bg-gray-100",
+                  ]}
+                >
+                  <span class="mr-2 text-gray-400">›</span>
+                  {p.title}
+                </a>
+              );
+            })}
+          </nav>
+        </div>
+      </aside>
+
+      <!-- 右：本文 -->
+      <div class="md:border-l md:border-gray-200 md:pl-8 min-w-0">
+        <div class="pt-6">
+          {blog ? <BlogPost blog={blog} /> : <p>記事が見つかりません</p>}
+        </div>
+      </div>
+    </section>
+  </div>
+</Layout>

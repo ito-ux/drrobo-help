@@ -15,7 +15,7 @@ export const client = createClient({
 });
 
 /* =========================
-   お知らせ
+   お知らせ（news）
 ========================= */
 
 export type Notice = {
@@ -37,7 +37,10 @@ export const getNoticeList = async (queries?: MicroCMSQueries) => {
   });
 };
 
-export const getNoticeDetail = async (contentId: string, queries?: MicroCMSQueries) => {
+export const getNoticeDetail = async (
+  contentId: string,
+  queries?: MicroCMSQueries
+) => {
   return client.getListDetail<Notice>({
     endpoint: NOTICE_ENDPOINT,
     contentId,
@@ -63,9 +66,9 @@ export const getImportantNotice = async () => {
 ========================= */
 
 export type CommandGroup = {
-  name: string;     // 表示名（例：Web操作）
-  slug: string;     // スラッグ（例：web）
-  order: number;    // 並び順（例：10）
+  name: string; // 表示名（例：Web操作）
+  slug: string; // スラッグ（例：web）
+  order: number; // 並び順（例：10）
 } & MicroCMSListContent;
 
 const COMGR_ENDPOINT = "comgr";
@@ -80,18 +83,22 @@ export const getComgrList = async (queries?: MicroCMSQueries) => {
   });
 };
 
-export type Blog = {
-  title: string;
-  description?: string;
-  content: string;
-  thumbnail?: MicroCMSImage;
-  category?: Category[];
+/* =========================
+   カテゴリ（categories）
+========================= */
 
-  // 追加：コマンドグループ参照（複数）
-  comgr?: CommandGroup[];
+export type Category = {
+  name: string;
 } & MicroCMSListContent;
 
+const CATEGORY_ENDPOINT = "categories";
 
+export const getCategoryList = async (queries?: MicroCMSQueries) => {
+  return client.getList<Category>({
+    endpoint: CATEGORY_ENDPOINT,
+    queries,
+  });
+};
 
 /* =========================
    ヘルプ記事（docs）
@@ -102,16 +109,25 @@ export type Blog = {
   description?: string;
   content: string;
   thumbnail?: MicroCMSImage;
+
+  // 参照（複数）想定
   category?: Category[];
+
+  // 参照（複数）想定：コマンド解説側で使う
+  comgr?: CommandGroup[];
+
+  // ★Startガイド用：microCMSに数値フィールドを追加したら使う
+  order?: number;
+
+  // ★将来 slug フィールドを追加したいならここ（今はid運用でもOK）
+  slug?: string;
 } & MicroCMSListContent;
 
-export type Category = {
-  name: string;
-} & MicroCMSListContent;
+const DOCS_ENDPOINT = "docs";
 
 export const getBlogList = async (queries?: MicroCMSQueries) => {
   return client.getList<Blog>({
-    endpoint: "docs",
+    endpoint: DOCS_ENDPOINT,
     queries,
   });
 };
@@ -121,16 +137,29 @@ export const getBlogDetail = async (
   queries?: MicroCMSQueries
 ) => {
   return client.getListDetail<Blog>({
-    endpoint: "docs",
+    endpoint: DOCS_ENDPOINT,
     contentId,
     queries,
   });
 };
 
-export const getCategoryList = async (queries?: MicroCMSQueries) => {
-  return client.getList<Category>({
-    endpoint: "categories",
-    queries,
+/**
+ * スタートガイド用：カテゴリで絞り込み、order順で取得
+ * startCategoryId は microCMS の categories の「スタートガイド」カテゴリIDを渡す想定
+ *
+ * 例）filters: category[contains]xxxxxx
+ */
+export const getStartGuideList = async (
+  startCategoryId: string,
+  queries?: MicroCMSQueries
+) => {
+  return client.getList<Blog>({
+    endpoint: DOCS_ENDPOINT,
+    queries: {
+      filters: `category[contains]${startCategoryId}`,
+      orders: "order",
+      ...queries,
+    },
   });
 };
 
